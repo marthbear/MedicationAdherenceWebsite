@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medication Adherence Website</title>
+</head>
+<body>
+    <h1>Medication Adherence Program</h1>
+
+    <!-- ====== Prescription Entry Form ====== -->
+    <p>Enter new prescription here:</p>
+    <form id="medicineForm">
+        <!-- Input for the name of the medicine -->
+        Medicine Name: <input type="text" id="medicine"><br>
+
+        <!-- Input for how much should be taken daily -->
+        Daily Dosage: <input type="text" id="dosage"><br>
+
+        <!-- Input for what times during the day the medicine is taken -->
+        Dose times (Military Time): <input type="text" id="doseTime"><br><br>
+
+        <!-- Button that triggers JavaScript function newPrescription() -->
+        <input type="button" onclick="newPrescription()" value="Submit"><br><br><br>
+    </form>
+
+    <!-- ====== Section to display saved prescriptions ====== -->
+    <p>Current Prescriptions:</p>
+    <div id="prescriptionList"></div>
+
+    <script>
+        // ====== Function to Add a New Prescription ======
+        function newPrescription() {
+            // Grab the values entered by the user in the input fields
+            const med = document.getElementById("medicine").value;
+            const dose = document.getElementById("dosage").value;
+            const time = document.getElementById("doseTime").value;
+
+            // Get the existing prescriptions from localStorage, or start with an empty array
+            let prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+
+            // Create a new prescription object with user inputs + default lastTaken value
+            prescriptions.push({
+                medicine: med,
+                dosage: dose,
+                doseTime: time,
+                lastTaken: null // Initialize dose tracking to null (not yet taken)
+            });
+
+            // Save the updated prescriptions array back to localStorage
+            localStorage.setItem("prescriptions", JSON.stringify(prescriptions));
+
+            // Refresh the displayed list
+            displayPrescriptions();
+        }
+
+        // ====== Function to Mark a Dose as Taken ======
+        function markDoseTaken(index) {
+            // Load existing prescriptions
+            let prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+
+            // Get the current time (formatted as HH:MM)
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');   // ensures 2 digits
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}`; // e.g. "14:30"
+
+            // Update the prescription at the given index with the current time
+            prescriptions[index].lastTaken = timeString;
+
+            // Save the updated list back to localStorage
+            localStorage.setItem("prescriptions", JSON.stringify(prescriptions));
+
+            // Refresh the UI
+            displayPrescriptions();
+        }
+
+        // ====== Function to Display All Prescriptions ======
+        function displayPrescriptions() {
+            // Load prescriptions from localStorage (or empty list)
+            const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+
+            // Get reference to the container where prescriptions will be shown
+            const container = document.getElementById("prescriptionList");
+
+            // Clear anything already in the container
+            container.innerHTML = "";
+
+            // Loop through each prescription and display it
+            prescriptions.forEach((p, index) => {
+                // For each prescription, add a section with its data + a "Take Dose" button
+                container.innerHTML += `
+                    <div style="margin-bottom: 12px;">
+                        <strong>${index + 1}. ${p.medicine}</strong> – ${p.dosage} at ${p.doseTime}
+                        <br>
+                        <!-- Button to mark the dose as taken -->
+                        <button onclick="markDoseTaken(${index})">Take Dose</button>
+
+                        <!-- Show when the dose was last taken -->
+                        ${p.lastTaken 
+                            ? `<p>Last taken at: <strong>${p.lastTaken}</strong></p>` 
+                            : `<p style="color:gray;">Not taken yet</p>`}
+                    </div>
+                `;
+            });
+        }
+
+        // ====== Automatically Run When Page Loads ======
+        // This ensures saved prescriptions appear immediately
+        window.onload = displayPrescriptions;
+    </script>
+</body>
+</html>
