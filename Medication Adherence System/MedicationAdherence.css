@@ -1,166 +1,67 @@
-* {
+/* General page styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #383585;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #e1d895 0%, #f4d007 100%);
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.container {
-    width: 90%;
-    max-width: 1200px;
-    background-color: rgba(255, 255, 255, 0.1); /* Fallback for unsupported browsers */
-    border-radius: 20px;
+  }
+  
+  /* Styling for the custom paragraph tag (note: <p1> isn’t a standard element) */
+  p1 {
+    display: block; /* Ensure it behaves like a block element */
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px;
+    color: #333;
+  }
+  
+  /* Form container */
+  form#login {
+    background-color: #ffffff;
+    max-width: 400px;
+    margin: 30px auto;
     padding: 20px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4);
-    /* Apply backdrop-filter only if supported */
-    background-color: rgba(255, 255, 255, 0.3);
-    -webkit-backdrop-filter: blur(10px); /* For Safari */
-    backdrop-filter: blur(10px); /* Supported browsers */
-}
-
-header {
-    text-align: center;
-    padding: 40px 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    margin-bottom: 30px;
-}
-
-header h1 {
-    font-size: 3.5rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-}
-
-header p {
-    font-size: 1.6rem;
-    color: #ffebee;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+  }
+  
+  /* Styling input fields for text and password */
+  form#login input[type="text"],
+  form#login input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  /* Styling the checkbox */
+  form#login input[type="checkbox"] {
     margin-top: 10px;
-}
-
-nav ul {
-    list-style: none;
-    text-align: center;
-    margin: 20px 0;
-    padding: 0;
-}
-
-nav ul li {
-    display: inline-block;
-    margin: 0 20px;
-}
-
-nav ul li a {
-    text-decoration: none;
-    color: #ffebee;
-    font-size: 1.4rem;
+    cursor: pointer;
+  }
+  
+  /* Styling the button inside the link */
+  form#login input[type="button"] {
+    background-color: #4CAF50;
+    color: #fff;
     padding: 10px 20px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 25px;
-    transition: all 0.3s ease;
-}
-
-nav ul li a:hover {
-    background-color: rgba(255, 255, 255, 0.4);
-    color: #fff;
-}
-
-.main-content {
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.2);
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
-    animation: fadeInUp 1s ease;
-}
-
-.main-content h2 {
-    font-size: 2.8rem;
-    color: #ffebee;
-    margin-bottom: 20px;
-}
-
-.main-content p {
-    font-size: 1.4rem;
-    color: #fff;
-    margin-bottom: 40px;
-}
-
-.cta-button {
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  /* Hover effect for the button */
+  form#login input[type="button"]:hover {
+    background-color: #45a049;
+  }
+  
+  /* Ensure links inside the form have no extra styling */
+  form#login a {
     text-decoration: none;
-    padding: 15px 40px;
-    background-color: #0b0d00;
-    color: #e1cf09;
-    border-radius: 50px;
-    font-size: 1.4rem;
-    font-weight: 600;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-.cta-button:hover {
-    background-color: #fff;
-    color: #a36e13;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4);
-}
-
-footer {
-    text-align: center;
-    padding: 20px 0;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffebee;
-    margin-top: 40px;
-    border-radius: 10px;
-    font-size: 1rem;
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    0% {
-        transform: translateY(30px);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Media Queries for Responsiveness */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 2.8rem;
-    }
-
-    header p {
-        font-size: 1.4rem;
-    }
-
-    nav ul li a {
-        font-size: 1.2rem;
-    }
-
-    .main-content h2 {
-        font-size: 2.4rem;
-    }
-
-    .main-content p {
-        font-size: 1.2rem;
-    }
-
-    .cta-button {
-        font-size: 1.2rem;
-    }
-}
+  }
+  
