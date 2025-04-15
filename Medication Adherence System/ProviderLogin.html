@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        Medication Adherence Program
+    </title>
+</head>
+<body>
+    <p1>
+       Provider Log In: 
+    </p1>
+    <form id="login" action="/action_page.php">
+        Username: <input type="text" name="username"><br>
+        Password: <input type="password" name="password" id="myInput"><br>
+        <input type="checkbox" onclick="hidePassword()">Show Password<br><br>
+        <a href="file:///C:/Users/Nicholas%20Larson/Desktop/Medication%20Adherence%20System/MedicationAdherenceWebsite.html">
+            <input type="button" onclick="loginFunction()" value="Continue">
+        </a>
+        
+    </form>
+
+    
+    <script>
+        function loginFunction(){
+            document.getElementById("login").submit();
+        }
+
+        function hidePassword(){
+            var x = document.getElementById("myInput");
+                if(x.type === "password"){
+                    x.type = "text";
+                }else{
+                    x.type = "password";
+                }
+        }
+    </script>
+</body>
+
+</html>
