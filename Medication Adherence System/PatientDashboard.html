@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Patient Dashboard</title>
+</head>
+<body>
+  <h1>Patient Dashboard</h1>
+  <div id="prescription-list"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      addDoc,
+      query,
+      where,
+      orderBy,
+      Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
+      authDomain: "medicationadherencewebsite.firebaseapp.com",
+      projectId: "medicationadherencewebsite",
+      storageBucket: "medicationadherencewebsite.appspot.com",
+      messagingSenderId: "812313529935",
+      appId: "1:812313529935:web:f4581c964bc30025eaa43a",
+      measurementId: "G-CTRYEJZ7M3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const todayDate = new Date().toISOString().split("T")[0];
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        document.body.innerHTML = "<p>Please log in to view your dashboard.</p>";
+        return;
+      }
+
+      console.log("✅ Logged in as:", user.email);
+
+      const prescriptionsRef = collection(db, `users/${user.uid}/prescriptions`);
+      const snapshot = await getDocs(prescriptionsRef);
+      const listDiv = document.getElementById("prescription-list");
+
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        const prescId = docSnap.id;
+
+        const dosesRef = collection(db, `users/${user.uid}/prescriptions/${prescId}/doses`);
+        const doseQuery = query(dosesRef, where("date", "==", todayDate), orderBy("timeTaken", "desc"));
+        const doseSnapshot = await getDocs(doseQuery);
+        const takenDoses = doseSnapshot.docs.map(d => d.data());
+
+        const dosesTakenCount = {};
+        data.doseTimes.forEach(time => dosesTakenCount[time] = 0);
+        takenDoses.forEach(dose => {
+          const baseTime = dose.doseTime.split(" ")[0];
+          if (baseTime in dosesTakenCount) {
+            dosesTakenCount[baseTime]++;
+          }
+        });
+
+        const container = document.createElement("div");
+        container.style.border = "1px solid #ccc";
+        container.style.padding = "10px";
+        container.style.margin = "10px 0";
+        container.style.background = "#f9f9f9";
+
+        const title = document.createElement("h3");
+        title.textContent = data.medicine;
+        container.appendChild(title);
+
+        const dosage = document.createElement("p");
+        dosage.innerHTML = `<strong>Dosage:</strong> ${data.dosage}`;
+        container.appendChild(dosage);
+
+        const description = document.createElement("p");
+        description.innerHTML = `<strong>Description:</strong> ${data.description}`;
+        container.appendChild(description);
+
+        const times = document.createElement("p");
+        times.innerHTML = `<strong>Dose Times:</strong> ${data.doseTimes.join(", ")}`;
+        container.appendChild(times);
+
+        data.doseTimes.forEach(time => {
+          const count = dosesTakenCount[time];
+          const btn = document.createElement("button");
+          btn.textContent = `Mark ${time} dose as taken`;
+
+          btn.onclick = async () => {
+            const nowString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const uniqueDoseTime = `${time} (${nowString})`;
+
+            console.log("📝 Marking dose:", {
+              uid: user.uid,
+              prescId,
+              doseTime: uniqueDoseTime,
+              todayDate
+            });
+
+            try {
+              const result = await addDoc(collection(db, `users/${user.uid}/prescriptions/${prescId}/doses`), {
+                doseTime: uniqueDoseTime,
+                date: todayDate,
+                timeTaken: Timestamp.now()
+              });
+              console.log("✅ Dose saved to Firestore with ID:", result.id);
+              location.reload();
+            } catch (err) {
+              console.error("❌ Error marking dose:", err);
+              alert("There was an error marking the dose. Check the console.");
+            }
+          };
+
+          container.appendChild(btn);
+
+          const counter = document.createElement("p");
+          counter.innerHTML = `<strong>${time}:</strong> ${count} dose(s) taken today`;
+          container.appendChild(counter);
+        });
+
+        const history = document.createElement("div");
+        history.innerHTML = `<h4>Dose History (Today)</h4>`;
+        takenDoses.forEach(dose => {
+          const baseTime = dose.doseTime;
+          const timeTaken = new Date(dose.timeTaken.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const entry = document.createElement("p");
+          entry.textContent = `${baseTime} taken at ${timeTaken}`;
+          history.appendChild(entry);
+        });
+
+        container.appendChild(history);
+        listDiv.appendChild(container);
+      }
+    });
+  </script>
+</body>
+</html>

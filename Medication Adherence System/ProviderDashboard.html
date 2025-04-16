@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Provider Dashboard</title>
+  <link rel="stylesheet" href="ProviderDashboard.css">
+</head>
+<body>
+  <h1>Provider Dashboard</h1>
+
+  <!-- Section to manually add/link a patient by email -->
+  <section>
+    <h2>Add New Patient by Email</h2>
+    <input type="email" id="manual-patient-email" placeholder="Patient Email">
+    <button onclick="linkPatientByEmail()">Link Patient</button>
+    <p id="manual-link-status"></p>
+  </section>
+
+  <!-- Section to display all patients -->
+  <section>
+    <h2>All Patients</h2>
+    <ul id="patient-list"></ul>
+    <p id="link-status"></p>
+  </section>
+
+  <!-- Section to create new prescriptions -->
+  <section id="prescription-section" style="display:none;">
+    <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
+    <input type="text" id="med-name" placeholder="Medicine Name"><br>
+    <input type="text" id="dosage" placeholder="Daily Dosage"><br>
+    <input type="text" id="dose-times" placeholder="Dose times (e.g. 08:00, 14:00)"><br>
+    <textarea id="med-description" placeholder="Description (e.g. what this is for)"></textarea><br>
+    <textarea id="doctor-notes" placeholder="Doctor's Notes (private notes)"></textarea><br>
+    <button onclick="createPrescription()">Add Prescription</button>
+    <p id="rx-status"></p>
+  </section>
+
+  <!-- Firebase Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      addDoc,
+      query,
+      where,
+      doc
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
+      authDomain: "medicationadherencewebsite.firebaseapp.com",
+      projectId: "medicationadherencewebsite",
+      storageBucket: "medicationadherencewebsite.appspot.com",
+      messagingSenderId: "812313529935",
+      appId: "1:812313529935:web:f4581c964bc30025eaa43a",
+      measurementId: "G-CTRYEJZ7M3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let selectedPatientUID = null;
+    let selectedPatientName = "";
+
+    // Load all patients on page load
+    async function loadPatients() {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("role", "==", "patient"));
+      const snapshot = await getDocs(q);
+
+      const list = document.getElementById("patient-list");
+      list.innerHTML = "";
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const li = document.createElement("li");
+        li.textContent = `${data.firstName} ${data.lastName} (${data.email})`;
+        li.style.cursor = "pointer";
+        li.onclick = () => selectPatient(docSnap.id, `${data.firstName} ${data.lastName}`);
+        list.appendChild(li);
+      });
+    }
+
+    // Select a patient from the list or search
+    window.selectPatient = function (uid, name) {
+      selectedPatientUID = uid;
+      selectedPatientName = name;
+      document.getElementById("selected-patient-name").textContent = name;
+      document.getElementById("prescription-section").style.display = "block";
+      document.getElementById("link-status").textContent = `Selected patient: ${name}`;
+    };
+
+    // Manual linking by email
+    window.linkPatientByEmail = async function () {
+      const email = document.getElementById("manual-patient-email").value;
+      const usersQuery = query(
+        collection(db, "users"),
+        where("email", "==", email),
+        where("role", "==", "patient")
+      );
+      const result = await getDocs(usersQuery);
+
+      if (!result.empty) {
+        const docSnap = result.docs[0];
+        const data = docSnap.data();
+        selectPatient(docSnap.id, `${data.firstName} ${data.lastName}`);
+        document.getElementById("manual-link-status").textContent = `Linked to patient: ${data.firstName} ${data.lastName}`;
+      } else {
+        document.getElementById("manual-link-status").textContent = "No patient found with that email.";
+      }
+    };
+
+    // Create new prescription
+    window.createPrescription = async function () {
+      if (!selectedPatientUID) {
+        document.getElementById("rx-status").textContent = "No patient selected.";
+        return;
+      }
+
+      const med = document.getElementById("med-name").value;
+      const dosage = document.getElementById("dosage").value;
+      const times = document.getElementById("dose-times").value;
+      const description = document.getElementById("med-description").value;
+      const notes = document.getElementById("doctor-notes").value;
+
+      try {
+        await addDoc(collection(db, `users/${selectedPatientUID}/prescriptions`), {
+          medicine: med,
+          dosage: dosage,
+          doseTimes: times.split(",").map(t => t.trim()),
+          description: description,
+          doctorNotes: notes,
+          createdAt: new Date()
+        });
+
+        document.getElementById("rx-status").textContent = "Prescription added!";
+      } catch (err) {
+        document.getElementById("rx-status").textContent = "Error: " + err.message;
+      }
+    };
+
+    loadPatients(); // Load patients on page load
+  </script>
+</body>
+</html>

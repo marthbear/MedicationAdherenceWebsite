@@ -1,73 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>
-        Medication Adherence Program
-    </title>
+    <title>Medication Adherence Program</title>
     <link rel="stylesheet" href="ProviderLogin.css">
 </head>
 <body>
-    <h1>
-       Provider Log In 
-    </h1>
-    <p1>Welcome to the Medication Adherence Program. Please log in to continue.</p1><br><br>
-    <p2>If you are a patient, please click the button below to log in.</p2><br>
-    <a href="file:///C:/Users/Nicholas%20Larson/Desktop/Medication%20Adherence%20System/PatientLogin.html">
-        <input type="button" onclick="loginFunction()" value="Patient Login">
+    <h1>Provider Log In</h1>
+    <p>Welcome to the Medication Adherence Program. Please log in to continue.</p><br><br>
+    <p>If you are a patient, please click the button below to log in.</p><br>
+    <a href="PatientLogin.html">
+        <input type="button" value="Patient Login">
     </a><br><br><br>
-    
-    <form id="login" action="/action_page.php">
-        Username: <input type="text" name="username"><br>
-        Password: <input type="password" name="password" id="myInput"><br>
-        <input type="checkbox" onclick="hidePassword()">Show Password<br><br>
-        <a href="file:///C:/Users/Nicholas%20Larson/Desktop/Medication%20Adherence%20System/MedicationAdherenceWebsite.html">
-            <input type="button" onclick="loginFunction()" value="Continue">
-        </a>
-        
-    </form>
 
-  Email: <input type="email" id="provider-login-email" placeholder="Email"><br>
-  Password: <input type="password" id="provider-login-password"><br>
-  <input type="checkbox" onclick="togglePassword()">Show Password<br>
-  <button onclick="loginProvider()">Log In</button>
+    <!-- Provider Login Form -->
+    Email: <input type="email" id="provider-login-email" placeholder="Email"><br>
+    Password: <input type="password" id="provider-login-password"><br>
+    <input type="checkbox" onclick="togglePassword()">Show Password<br>
+    <button onclick="loginProvider()">Log In</button>
 
-  <p>Don't have an account? <a href="CreateProviderAccount.html">Create one here</a></p>
-  <p id="status"></p>
+    <p>Don't have an account? <a href="CreateProviderAccount.html">Create one here</a></p>
+    <p id="status"></p>
 
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
-      authDomain: "medicationadherencewebsite.firebaseapp.com",
-      projectId: "medicationadherencewebsite",
-      storageBucket: "medicationadherencewebsite.appspot.com",
-      messagingSenderId: "812313529935",
-      appId: "1:812313529935:web:f4581c964bc30025eaa43a",
-      measurementId: "G-CTRYEJZ7M3"
-    };
+    <!-- Modular Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+      const firebaseConfig = {
+        apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
+        authDomain: "medicationadherencewebsite.firebaseapp.com",
+        projectId: "medicationadherencewebsite",
+        storageBucket: "medicationadherencewebsite.appspot.com",
+        messagingSenderId: "812313529935",
+        appId: "1:812313529935:web:f4581c964bc30025eaa43a",
+        measurementId: "G-CTRYEJZ7M3"
+      };
 
-    function loginProvider() {
-      const email = document.getElementById("provider-login-email").value;
-      const password = document.getElementById("provider-login-password").value;
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
 
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          document.getElementById("status").textContent = "Logged in!";
-          window.location.href = "MedicationAdherenceWebsite.html";
-        })
-        .catch(error => {
-          document.getElementById("status").textContent = error.message;
-        });
-    }
+      // Login function
+      window.loginProvider = function () {
+        const email = document.getElementById("provider-login-email").value;
+        const password = document.getElementById("provider-login-password").value;
 
-    function togglePassword() {
-      const pw = document.getElementById("provider-login-password");
-      pw.type = pw.type === "password" ? "text" : "password";
-    }
-  </script>
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            document.getElementById("status").textContent = "Logged in!";
+            window.location.href = "ProviderDashboard.html";
+          })
+          .catch(error => {
+            document.getElementById("status").textContent = error.message;
+          });
+      }
+
+      // Toggle password visibility
+      window.togglePassword = function () {
+        const pw = document.getElementById("provider-login-password");
+        pw.type = pw.type === "password" ? "text" : "password";
+      }
+    </script>
 </body>
 </html>
+

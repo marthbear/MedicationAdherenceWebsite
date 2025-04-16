@@ -6,16 +6,20 @@
 <body>
   <h2>Create Provider Account</h2>
 
-  Email: <input type="email" id="provider-email" placeholder="Provider Email"><br>
+  First Name: <input type="text" id="provider-firstname" placeholder="First Name"><br>
+  Last Name: <input type="text" id="provider-lastname" placeholder="Last Name"><br>
+  Email: <input type="email" id="provider-email" placeholder="Email"><br>
   Password: <input type="password" id="provider-password"><br>
   <input type="checkbox" onclick="togglePassword()">Show Password<br>
   <button onclick="createProviderAccount()">Sign Up</button>
 
   <p id="status"></p>
 
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
       authDomain: "medicationadherencewebsite.firebaseapp.com",
@@ -26,27 +30,38 @@
       measurementId: "G-CTRYEJZ7M3"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    function createProviderAccount() {
+    window.createProviderAccount = async function () {
       const email = document.getElementById("provider-email").value;
       const password = document.getElementById("provider-password").value;
+      const firstName = document.getElementById("provider-firstname").value;
+      const lastName = document.getElementById("provider-lastname").value;
 
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          document.getElementById("status").textContent = "Account created!";
-          window.location.href = "ProviderLogin.html";
-        })
-        .catch(error => {
-          document.getElementById("status").textContent = error.message;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        await setDoc(doc(db, "users", user.uid), {
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          role: "provider"
         });
-    }
 
-    function togglePassword() {
+        document.getElementById("status").textContent = "Account created!";
+        window.location.href = "ProviderLogin.html";
+      } catch (error) {
+        document.getElementById("status").textContent = error.message;
+      }
+    };
+
+    window.togglePassword = function () {
       const pw = document.getElementById("provider-password");
       pw.type = pw.type === "password" ? "text" : "password";
-    }
+    };
   </script>
 </body>
 </html>
