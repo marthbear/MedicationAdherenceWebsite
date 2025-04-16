@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Provider Login</title>
+  <title>Create Provider Account</title>
 </head>
 <body>
-  <h2>Provider Login</h2>
+  <h2>Create Provider Account</h2>
 
-  Email: <input type="email" id="provider-login-email" placeholder="Email"><br>
-  Password: <input type="password" id="provider-login-password"><br>
+  Email: <input type="email" id="provider-email" placeholder="Provider Email"><br>
+  Password: <input type="password" id="provider-password"><br>
   <input type="checkbox" onclick="togglePassword()">Show Password<br>
-  <button onclick="loginProvider()">Log In</button>
+  <button onclick="createProviderAccount()">Sign Up</button>
 
-  <p>Don't have an account? <a href="CreateProviderAccount.html">Create one here</a></p>
   <p id="status"></p>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
@@ -30,14 +29,14 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    function loginProvider() {
-      const email = document.getElementById("provider-login-email").value;
-      const password = document.getElementById("provider-login-password").value;
+    function createProviderAccount() {
+      const email = document.getElementById("provider-email").value;
+      const password = document.getElementById("provider-password").value;
 
-      auth.signInWithEmailAndPassword(email, password)
+      auth.createUserWithEmailAndPassword(email, password)
         .then(() => {
-          document.getElementById("status").textContent = "Logged in!";
-          window.location.href = "MedicationAdherenceWebsite.html";
+          document.getElementById("status").textContent = "Account created!";
+          window.location.href = "ProviderLogin.html";
         })
         .catch(error => {
           document.getElementById("status").textContent = error.message;
@@ -45,7 +44,7 @@
     }
 
     function togglePassword() {
-      const pw = document.getElementById("provider-login-password");
+      const pw = document.getElementById("provider-password");
       pw.type = pw.type === "password" ? "text" : "password";
     }
   </script>

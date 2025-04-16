@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Patient Account</title>
+</head>
+<body>
+  <h2>Create Patient Account</h2>
+
+  Email: <input type="email" id="patient-email" placeholder="Patient Email"><br>
+  Password: <input type="password" id="patient-password"><br>
+  <input type="checkbox" onclick="togglePassword()">Show Password<br>
+  <button onclick="createPatientAccount()">Sign Up</button>
+
+  <p id="status"></p>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
+    authDomain: "medicationadherencewebsite.firebaseapp.com",
+    projectId: "medicationadherencewebsite",
+    storageBucket: "medicationadherencewebsite.appspot.com",
+    messagingSenderId: "812313529935",
+    appId: "1:812313529935:web:f4581c964bc30025eaa43a",
+    measurementId: "G-CTRYEJZ7M3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  window.createPatientAccount = function () {
+    const email = document.getElementById("patient-email").value;
+    const password = document.getElementById("patient-password").value;
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        document.getElementById("status").textContent = "Account created!";
+        window.location.href = "PatientLogin.html";
+      })
+      .catch(error => {
+        document.getElementById("status").textContent = error.message;
+      });
+  }
+
+  window.togglePassword = function () {
+    const pw = document.getElementById("patient-password");
+    pw.type = pw.type === "password" ? "text" : "password";
+  }
+</script>
+</body>
+</html>
