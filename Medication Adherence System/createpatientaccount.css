@@ -1,11 +1,11 @@
 /* Overall Page Styling */
 body {
     font-family: Arial, sans-serif;
-    background-image: url('assets/doctorbackground.png');  
+    background-image: url('assets/haroldbackgroundwide.png');  
     background-size: cover;       /* Ensure the image covers the entire background */
     background-position: center;  /* Center the image */
     background-repeat: no-repeat; /* Prevent the image from repeating */
-    margin: 0;
+    margin: 200px;
     padding: 20px;
     text-align: center;  /* center all content */
   }
@@ -18,7 +18,13 @@ body {
     text-shadow: 3px 3px 6px rgba(20, 2, 45, 0.5);
     margin-bottom: 40px;
   }
-
+  h2 {
+    color: #f86401;
+    font-size: 2em;
+    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    text-shadow: 3px 3px 6px rgba(20, 2, 45, 0.5);
+    margin-bottom: 40px;
+  }
   p1 {
     color: #ffffff;
     font-size: 2em;
@@ -33,14 +39,6 @@ body {
     text-shadow: 3px 3px 6px rgba(20, 2, 45, 0.5);
     margin-bottom: 40px;
   }
-  p3 {
-    color: #6500b8;
-    font-size: 1.5em;
-    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    text-shadow: 3px 3px 6px rgba(20, 2, 45, 0.5);
-    margin-bottom: 40px;
-  }
-
   /* Link Styling */
   a {
     text-decoration: none; /* remove default underline on links */
