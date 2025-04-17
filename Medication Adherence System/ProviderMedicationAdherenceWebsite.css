@@ -12,6 +12,7 @@ body {
   
   /* Heading Styling */
   h1 {
+    text-align: left;
     color: #ffffff;
     font-size: 4em;
     font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
