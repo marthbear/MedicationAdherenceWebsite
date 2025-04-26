@@ -1,26 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Dashboard</title>
   <link rel="stylesheet" href="PatientDashboard.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .calendar {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: block;
+    }
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .calendar-table td {
+      height: 120px;
+      width: 120px;
+      text-align: center;
+      vertical-align: top;
+      position: relative;
+      border: 1px solid #ccc;
+    }
+    .calendar-table th {
+      height: 40px;
+    }
+    .month-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .month-year {
+      font-size: 24px;
+      margin: 0 20px;
+    }
+    .prev, .next {
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .med-box {
+      background-color: #ADD8E6;
+      margin: 2px 0;
+      padding: 2px 4px;
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .med-box:hover {
+      background-color: #87CEEB;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      width: 300px;
+      border-radius: 8px;
+    }
+    .modal.show {
+      display: block;
+    }
+    .modal .modal-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal button {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .modal button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
+
 <body>
   <h1>Patient Dashboard</h1>
-  <div id="prescription-list"></div>
+  <button onclick="window.location.href='PatientAdherence.html'">View Adherence Tracker</button>
 
+
+  <!-- Calendar Section -->
+  <div class="calendar">
+    <div class="month-header">
+      <button class="prev">&lt;</button>
+      <span class="month-year"></span>
+      <button class="next">&gt;</button>
+    </div>
+    <table class="calendar-table">
+      <thead>
+        <tr>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Modal for Medication Details -->
+  <div id="medication-modal" class="modal">
+    <div class="modal-content">
+      <h2 id="medication-title"></h2>
+      <p><strong>Medicine:</strong> <span id="medication-name"></span></p>
+      <p><strong>Dosage:</strong> <span id="medication-dosage"></span></p>
+      <p><strong>Description:</strong> <span id="medication-description"></span></p>
+      <p><strong>Doctor's Notes:</strong> <span id="medication-notes"></span></p>
+      <button id="mark-taken-btn">Mark as Taken</button>
+    </div>
+  </div>
+
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      getDocs,
-      addDoc,
-      query,
-      where,
-      orderBy,
-      Timestamp
-    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
@@ -36,109 +154,165 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const todayDate = new Date().toISOString().split("T")[0];
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+      console.error("Persistence error:", error);
+    });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        document.body.innerHTML = "<p>Please log in to view your dashboard.</p>";
-        return;
+    let patientUID = null;
+    let currentDate = new Date();
+    let selectedDose = null;
+    let selectedMedBox = null;
+
+    const calendarTable = document.querySelector('.calendar-table tbody');
+    const monthYearDisplay = document.querySelector('.month-year');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    const modal = document.getElementById('medication-modal');
+    const medicationTitle = document.getElementById('medication-title');
+    const medicationName = document.getElementById('medication-name');
+    const medicationDosage = document.getElementById('medication-dosage');
+    const medicationDescription = document.getElementById('medication-description');
+    const medicationNotes = document.getElementById('medication-notes');
+    const markTakenBtn = document.getElementById('mark-taken-btn');
+
+    async function loadPrescriptions() {
+  if (!patientUID) return;
+
+  const prescriptions = [];
+
+  const prescriptionsRef = collection(db, `users/${patientUID}/prescriptions`);
+  const snapshot = await getDocs(prescriptionsRef);
+
+  snapshot.forEach(docSnap => {
+    prescriptions.push({ 
+      ...docSnap.data(), 
+      id: docSnap.id,
+      doseDates: Array.isArray(docSnap.data().doseDates) ? docSnap.data().doseDates : [],
+      takenDates: Array.isArray(docSnap.data().takenDates) ? docSnap.data().takenDates : []
+    });
+  });
+
+  console.log("Loaded prescriptions:", prescriptions);
+
+  displayPrescriptionsOnCalendar(prescriptions);
+}
+
+
+
+    function renderCalendar(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+
+      monthYearDisplay.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+
+      calendarTable.innerHTML = '';
+      let row = document.createElement('tr');
+      let day = firstDay.getDay();
+
+      for (let i = 0; i < day; i++) {
+        row.appendChild(document.createElement('td'));
       }
 
-      console.log("✅ Logged in as:", user.email);
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+        const cell = document.createElement('td');
+        cell.textContent = i;
+        cell.setAttribute('data-date', `${year}-${(month+1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`);
+        row.appendChild(cell);
+        day++;
 
-      const prescriptionsRef = collection(db, `users/${user.uid}/prescriptions`);
-      const snapshot = await getDocs(prescriptionsRef);
-      const listDiv = document.getElementById("prescription-list");
+        if (day % 7 === 0) {
+          calendarTable.appendChild(row);
+          row = document.createElement('tr');
+        }
+      }
 
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        const prescId = docSnap.id;
+      if (row.children.length > 0) {
+        while (row.children.length < 7) {
+          row.appendChild(document.createElement('td'));
+        }
+        calendarTable.appendChild(row);
+      }
+    }
 
-        const dosesRef = collection(db, `users/${user.uid}/prescriptions/${prescId}/doses`);
-        const doseQuery = query(dosesRef, where("date", "==", todayDate), orderBy("timeTaken", "desc"));
-        const doseSnapshot = await getDocs(doseQuery);
-        const takenDoses = doseSnapshot.docs.map(d => d.data());
+    function displayPrescriptionsOnCalendar(prescriptions) {
+      const calendarCells = document.querySelectorAll('.calendar-table td');
 
-        const dosesTakenCount = {};
-        data.doseTimes.forEach(time => dosesTakenCount[time] = 0);
-        takenDoses.forEach(dose => {
-          const baseTime = dose.doseTime.split(" ")[0];
-          if (baseTime in dosesTakenCount) {
-            dosesTakenCount[baseTime]++;
+      prescriptions.forEach(prescription => {
+        const doseDates = prescription.doseDates || [];
+        const takenDates = prescription.takenDates || [];
+
+        doseDates.forEach(doseDate => {
+          const cell = [...calendarCells].find(td => td.dataset.date === doseDate);
+          if (cell) {
+            const medBox = document.createElement('div');
+            medBox.classList.add('med-box');
+            medBox.textContent = prescription.medicine;
+
+            if (takenDates.includes(doseDate)) {
+              medBox.style.backgroundColor = "#d3d3d3";
+              medBox.style.textDecoration = "line-through";
+              medBox.style.pointerEvents = "none";
+            }
+
+            medBox.onclick = () => showPrescriptionDetails(doseDate, prescription, medBox);
+
+            cell.appendChild(medBox);
           }
         });
+      });
+    }
 
-        const container = document.createElement("div");
-        container.style.border = "1px solid #ccc";
-        container.style.padding = "10px";
-        container.style.margin = "10px 0";
-        container.style.background = "#f9f9f9";
+    function showPrescriptionDetails(date, prescription, medBox) {
+      medicationTitle.textContent = `Medication for ${date}`;
+      medicationName.textContent = prescription.medicine;
+      medicationDosage.textContent = prescription.dosage;
+      medicationDescription.textContent = prescription.description || "No description.";
+      medicationNotes.textContent = prescription.doctorNotes || "No notes.";
+      modal.classList.add('show');
 
-        const title = document.createElement("h3");
-        title.textContent = data.medicine;
-        container.appendChild(title);
+      selectedDose = { date, prescriptionId: prescription.id };
+      selectedMedBox = medBox;
+    }
 
-        const dosage = document.createElement("p");
-        dosage.innerHTML = `<strong>Dosage:</strong> ${data.dosage}`;
-        container.appendChild(dosage);
+    markTakenBtn.addEventListener('click', async () => {
+      modal.classList.remove('show');
+      if (selectedMedBox && selectedDose) {
+        selectedMedBox.style.backgroundColor = "#d3d3d3";
+        selectedMedBox.style.textDecoration = "line-through";
+        selectedMedBox.style.pointerEvents = "none";
 
-        const description = document.createElement("p");
-        description.innerHTML = `<strong>Description:</strong> ${data.description}`;
-        container.appendChild(description);
+        try {
+          const prescriptionRef = doc(db, `users/${patientUID}/prescriptions/${selectedDose.prescriptionId}`);
+          await updateDoc(prescriptionRef, {
+            takenDates: arrayUnion(selectedDose.date)
+          });
+        } catch (error) {
+          console.error("Error updating takenDates: ", error);
+        }
+      }
+    });
 
-        const times = document.createElement("p");
-        times.innerHTML = `<strong>Dose Times:</strong> ${data.doseTimes.join(", ")}`;
-        container.appendChild(times);
+    prevBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar(currentDate);
+      loadPrescriptions();
+    });
 
-        data.doseTimes.forEach(time => {
-          const count = dosesTakenCount[time];
-          const btn = document.createElement("button");
-          btn.textContent = `Mark ${time} dose as taken`;
+    nextBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar(currentDate);
+      loadPrescriptions();
+    });
 
-          btn.onclick = async () => {
-            const nowString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const uniqueDoseTime = `${time} (${nowString})`;
-
-            console.log("📝 Marking dose:", {
-              uid: user.uid,
-              prescId,
-              doseTime: uniqueDoseTime,
-              todayDate
-            });
-
-            try {
-              const result = await addDoc(collection(db, `users/${user.uid}/prescriptions/${prescId}/doses`), {
-                doseTime: uniqueDoseTime,
-                date: todayDate,
-                timeTaken: Timestamp.now()
-              });
-              console.log("✅ Dose saved to Firestore with ID:", result.id);
-              location.reload();
-            } catch (err) {
-              console.error("❌ Error marking dose:", err);
-              alert("There was an error marking the dose. Check the console.");
-            }
-          };
-
-          container.appendChild(btn);
-
-          const counter = document.createElement("p");
-          counter.innerHTML = `<strong>${time}:</strong> ${count} dose(s) taken today`;
-          container.appendChild(counter);
-        });
-
-        const history = document.createElement("div");
-        history.innerHTML = `<h4>Dose History (Today)</h4>`;
-        takenDoses.forEach(dose => {
-          const baseTime = dose.doseTime;
-          const timeTaken = new Date(dose.timeTaken.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const entry = document.createElement("p");
-          entry.textContent = `${baseTime} taken at ${timeTaken}`;
-          history.appendChild(entry);
-        });
-
-        container.appendChild(history);
-        listDiv.appendChild(container);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        patientUID = user.uid;
+        renderCalendar(currentDate);
+        loadPrescriptions();
+      } else {
+        console.log("Not logged in.");
       }
     });
   </script>

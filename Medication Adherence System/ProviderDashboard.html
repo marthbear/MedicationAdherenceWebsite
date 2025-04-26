@@ -1,51 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Provider Dashboard</title>
   <link rel="stylesheet" href="ProviderDashboard.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    section {
+      margin: 20px 0;
+    }
+    input, textarea {
+      margin: 5px 0;
+      padding: 8px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #3367d6;
+    }
+    .prescription-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px auto;
+      max-width: 600px;
+      text-align: left;
+      background-color: #f9f9f9;
+    }
+  </style>
 </head>
+
 <body>
   <h1>Provider Dashboard</h1>
 
-  <!-- Section to manually add/link a patient by email -->
+  <!-- Manual Patient Linking -->
   <section>
-    <h2>Add New Patient by Email</h2>
+    <h2>Link Patient by Email</h2>
     <input type="email" id="manual-patient-email" placeholder="Patient Email">
     <button onclick="linkPatientByEmail()">Link Patient</button>
     <p id="manual-link-status"></p>
   </section>
 
-  <!-- Section to display all patients -->
+  <!-- List of Linked Patients -->
   <section>
-    <h2>All Patients</h2>
+    <h2>Your Patients</h2>
     <ul id="patient-list"></ul>
     <p id="link-status"></p>
   </section>
 
-  <!-- Section to create new prescriptions -->
+  <!-- Prescription Section -->
   <section id="prescription-section" style="display:none;">
     <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
     <input type="text" id="med-name" placeholder="Medicine Name"><br>
     <input type="text" id="dosage" placeholder="Daily Dosage"><br>
     <input type="text" id="dose-times" placeholder="Dose times (e.g. 08:00, 14:00)"><br>
+    <input type="date" id="start-date"><br>
+    <input type="date" id="end-date"><br>
     <textarea id="med-description" placeholder="Description (e.g. what this is for)"></textarea><br>
     <textarea id="doctor-notes" placeholder="Doctor's Notes (private notes)"></textarea><br>
     <button onclick="createPrescription()">Add Prescription</button>
     <p id="rx-status"></p>
   </section>
 
-  <!-- Firebase Logic -->
+  <!-- Feedback Section -->
+  <section id="feedback-section" style="display:none;">
+    <h2>Patient Feedback for <span id="feedback-patient-name"></span></h2>
+    <div id="feedback-list"></div>
+  </section>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import {
       getFirestore,
       collection,
       getDocs,
       addDoc,
+      setDoc,
+      doc,
       query,
-      where,
-      doc
+      where
     } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -62,58 +117,87 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    let providerUID = null;
     let selectedPatientUID = null;
     let selectedPatientName = "";
 
-    // Load all patients on page load
-    async function loadPatients() {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("role", "==", "patient"));
-      const snapshot = await getDocs(q);
+    const patientList = document.getElementById('patient-list');
+    const prescriptionSection = document.getElementById('prescription-section');
+    const selectedPatientNameSpan = document.getElementById('selected-patient-name');
+    const feedbackSection = document.getElementById('feedback-section');
+    const feedbackPatientNameSpan = document.getElementById('feedback-patient-name');
+    const feedbackList = document.getElementById('feedback-list');
 
-      const list = document.getElementById("patient-list");
-      list.innerHTML = "";
-
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const li = document.createElement("li");
-        li.textContent = `${data.firstName} ${data.lastName} (${data.email})`;
-        li.style.cursor = "pointer";
-        li.onclick = () => selectPatient(docSnap.id, `${data.firstName} ${data.lastName}`);
-        list.appendChild(li);
-      });
+    function clearSelection() {
+      selectedPatientUID = null;
+      selectedPatientName = "";
+      prescriptionSection.style.display = "none";
+      feedbackSection.style.display = "none";
     }
 
-    // Select a patient from the list or search
-    window.selectPatient = function (uid, name) {
-      selectedPatientUID = uid;
-      selectedPatientName = name;
-      document.getElementById("selected-patient-name").textContent = name;
-      document.getElementById("prescription-section").style.display = "block";
-      document.getElementById("link-status").textContent = `Selected patient: ${name}`;
-    };
-
-    // Manual linking by email
+    // Link patient manually by email
     window.linkPatientByEmail = async function () {
       const email = document.getElementById("manual-patient-email").value;
+
       const usersQuery = query(
         collection(db, "users"),
         where("email", "==", email),
         where("role", "==", "patient")
       );
+
       const result = await getDocs(usersQuery);
 
       if (!result.empty) {
-        const docSnap = result.docs[0];
-        const data = docSnap.data();
-        selectPatient(docSnap.id, `${data.firstName} ${data.lastName}`);
-        document.getElementById("manual-link-status").textContent = `Linked to patient: ${data.firstName} ${data.lastName}`;
+        const patientDoc = result.docs[0];
+        const patientUID = patientDoc.id;
+        const patientData = patientDoc.data();
+
+        await setDoc(doc(db, `users/${providerUID}/linkedPatients/${patientUID}`), {
+          patientEmail: patientData.email,
+          patientFirstName: patientData.firstName,
+          patientLastName: patientData.lastName
+        });
+
+        document.getElementById("manual-link-status").textContent = `Linked to patient: ${patientData.firstName} ${patientData.lastName}`;
+        loadLinkedPatients();
       } else {
         document.getElementById("manual-link-status").textContent = "No patient found with that email.";
       }
     };
 
-    // Create new prescription
+    async function loadLinkedPatients() {
+      if (!providerUID) return;
+
+      const linkedRef = collection(db, `users/${providerUID}/linkedPatients`);
+      const snapshot = await getDocs(linkedRef);
+
+      patientList.innerHTML = '';
+
+      if (snapshot.empty) {
+        patientList.innerHTML = '<li>No patients linked yet.</li>';
+        return;
+      }
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const li = document.createElement('li');
+        li.textContent = `${data.patientFirstName} ${data.patientLastName} (${data.patientEmail})`;
+        li.onclick = () => selectPatient(docSnap.id, `${data.patientFirstName} ${data.patientLastName}`);
+        patientList.appendChild(li);
+      });
+    }
+
+    window.selectPatient = function (uid, name) {
+      selectedPatientUID = uid;
+      selectedPatientName = name;
+      selectedPatientNameSpan.textContent = name;
+      feedbackPatientNameSpan.textContent = name;
+      prescriptionSection.style.display = "block";
+      feedbackSection.style.display = "block";
+      loadFeedback(uid);
+      document.getElementById("link-status").textContent = `Selected patient: ${name}`;
+    };
+
     window.createPrescription = async function () {
       if (!selectedPatientUID) {
         document.getElementById("rx-status").textContent = "No patient selected.";
@@ -125,6 +209,24 @@
       const times = document.getElementById("dose-times").value;
       const description = document.getElementById("med-description").value;
       const notes = document.getElementById("doctor-notes").value;
+      const startDate = document.getElementById("start-date").value;
+      const endDate = document.getElementById("end-date").value;
+
+      if (!startDate || !endDate) {
+        document.getElementById("rx-status").textContent = "Please provide both start and end dates.";
+        return;
+      }
+
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      const doseDates = [];
+      let currentDate = start;
+
+      while (currentDate <= end) {
+        doseDates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
 
       try {
         await addDoc(collection(db, `users/${selectedPatientUID}/prescriptions`), {
@@ -133,6 +235,10 @@
           doseTimes: times.split(",").map(t => t.trim()),
           description: description,
           doctorNotes: notes,
+          startDate: startDate,
+          endDate: endDate,
+          doseDates: doseDates,
+          takenDates: [],
           createdAt: new Date()
         });
 
@@ -142,7 +248,38 @@
       }
     };
 
-    loadPatients(); // Load patients on page load
+    async function loadFeedback(patientUID) {
+      const prescriptionsRef = collection(db, `users/${patientUID}/prescriptions`);
+      const snapshot = await getDocs(prescriptionsRef);
+
+      feedbackList.innerHTML = '';
+
+      if (snapshot.empty) {
+        feedbackList.innerHTML = '<p>No prescriptions found.</p>';
+        return;
+      }
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'prescription-card';
+        card.innerHTML = `
+          <h3>${data.medicine}</h3>
+          <p><strong>Dosage:</strong> ${data.dosage}</p>
+          <p><strong>Patient Feedback:</strong> ${data.patientFeedback ? data.patientFeedback : "No feedback yet."}</p>
+        `;
+        feedbackList.appendChild(card);
+      });
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        providerUID = user.uid;
+        loadLinkedPatients();
+      } else {
+        console.log("Not logged in.");
+      }
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Adherence Tracker</title>
+  <link rel="stylesheet" href="PatientAdherence.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .prescription-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px auto;
+      max-width: 600px;
+      text-align: left;
+      background-color: #f9f9f9;
+    }
+    .progress-container {
+      background-color: #eee;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-bar {
+      height: 20px;
+      width: 0%;
+      text-align: center;
+      color: white;
+      line-height: 20px;
+      border-radius: 20px;
+      transition: width 0.5s;
+    }
+    .green {
+      background-color: #4CAF50;
+    }
+    .yellow {
+      background-color: #FFC107;
+    }
+    .red {
+      background-color: #F44336;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3367d6;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Adherence Tracker</h1>
+
+  <div id="prescriptions-container"></div>
+
+  <button onclick="goBack()">Back to Dashboard</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
+      authDomain: "medicationadherencewebsite.firebaseapp.com",
+      projectId: "medicationadherencewebsite",
+      storageBucket: "medicationadherencewebsite.appspot.com",
+      messagingSenderId: "812313529935",
+      appId: "1:812313529935:web:f4581c964bc30025eaa43a",
+      measurementId: "G-CTRYEJZ7M3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+      console.error("Persistence error:", error);
+    });
+
+    const prescriptionsContainer = document.getElementById('prescriptions-container');
+
+    function goBack() {
+      window.location.href = "PatientDashboard.html";
+    }
+
+    async function loadPrescriptions(patientUID) {
+      const prescriptionsRef = collection(db, `users/${patientUID}/prescriptions`);
+      const snapshot = await getDocs(prescriptionsRef);
+      const prescriptions = [];
+
+      snapshot.forEach(docSnap => {
+        prescriptions.push({ 
+          ...docSnap.data(), 
+          id: docSnap.id,
+          doseDates: Array.isArray(docSnap.data().doseDates) ? docSnap.data().doseDates : [],
+          takenDates: Array.isArray(docSnap.data().takenDates) ? docSnap.data().takenDates : []
+        });
+      });
+
+      displayPrescriptions(prescriptions);
+    }
+
+    function displayPrescriptions(prescriptions) {
+      prescriptionsContainer.innerHTML = '';
+
+      if (prescriptions.length === 0) {
+        prescriptionsContainer.innerHTML = '<p>No prescriptions found.</p>';
+        return;
+      }
+
+      prescriptions.forEach(prescription => {
+        const totalDoses = prescription.doseDates.length;
+        const takenDoses = prescription.takenDates.length;
+        const adherence = totalDoses > 0 ? Math.round((takenDoses / totalDoses) * 100) : 0;
+
+        const colorClass = adherence >= 90 ? 'green' : (adherence >= 70 ? 'yellow' : 'red');
+
+        const card = document.createElement('div');
+        card.className = 'prescription-card';
+        card.innerHTML = `
+          <h3>${prescription.medicine}</h3>
+          <p><strong>Dosage:</strong> ${prescription.dosage}</p>
+          <p><strong>Description:</strong> ${prescription.description || "No description"}</p>
+          <p><strong>Start Date:</strong> ${prescription.startDate || "N/A"}</p>
+          <p><strong>End Date:</strong> ${prescription.endDate || "N/A"}</p>
+          <div class="progress-container">
+            <div class="progress-bar ${colorClass}" style="width: ${adherence}%;">${adherence}%</div>
+          </div>
+        `;
+
+        prescriptionsContainer.appendChild(card);
+      });
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadPrescriptions(user.uid);
+      } else {
+        console.log("User not logged in.");
+      }
+    });
+  </script>
+</body>
+</html>
