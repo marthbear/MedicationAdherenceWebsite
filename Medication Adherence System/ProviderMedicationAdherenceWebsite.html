@@ -3,29 +3,32 @@
 <head>
     <title>Provider Medication Adherence Website</title>
     <link rel="stylesheet" href="ProviderMedicationAdherenceWebsite.css">
+    <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
-    <h1>Medication Adherence Program</h1>
+    <div class="container">
+        <h1>Medication Adherence Program</h1>
 
-    <!-- ====== Prescription Entry Form ====== -->
-    <p>Enter new prescription here:</p>
-    <form id="medicineForm">
-        <!-- Input for the name of the medicine -->
-        Medicine Name: <input type="text" id="medicine"><br>
+        <!-- ====== Prescription Entry Form ====== -->
+        <p>Enter new prescription here:</p>
+        <form id="medicineForm">
+            <!-- Input for the name of the medicine -->
+            Medicine Name: <input type="text" id="medicine"><br>
 
-        <!-- Input for how much should be taken daily -->
-        Daily Dosage: <input type="text" id="dosage"><br>
+            <!-- Input for how much should be taken daily -->
+            Daily Dosage: <input type="text" id="dosage"><br>
 
-        <!-- Input for what times during the day the medicine is taken -->
-        Dose times (Military Time): <input type="text" id="doseTime"><br><br>
+            <!-- Input for what times during the day the medicine is taken -->
+            Dose times (Military Time): <input type="text" id="doseTime"><br><br>
 
-        <!-- Button that triggers JavaScript function newPrescription() -->
-        <input type="button" onclick="newPrescription()" value="Submit"><br><br><br>
-    </form>
+            <!-- Button that triggers JavaScript function newPrescription() -->
+            <input type="button" onclick="newPrescription()" value="Submit"><br><br><br>
+        </form>
 
-    <!-- ====== Section to display saved prescriptions ====== -->
-    <p>Current Prescriptions:</p>
-    <div id="prescriptionList"></div>
+        <!-- ====== Section to display saved prescriptions ====== -->
+        <p>Current Prescriptions:</p>
+        <div id="prescriptionList"></div>
+    </div>
 
     <script>
         // ====== Function to Add a New Prescription ======

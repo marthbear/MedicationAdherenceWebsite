@@ -3,23 +3,31 @@
 <head>
     <title>Medication Adherence Program</title>
     <link rel="stylesheet" href="PatientLogin.css">
+    <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
-    <h1>Patient Log In</h1>
-    <p>Welcome to the Medication Adherence Program. Please log in to continue.</p><br><br>
-    <p>If you are a provider, please click the button below to log in.</p><br>
-    <a href="ProviderLogin.html">
-        <input type="button" value="Provider Login">
-    </a><br><br><br>
+    <div class="container">
+      <form>
+        <div class="form-group">
+        <h1>Patient Log In</h1>
+        <p>Welcome to the Medication Adherence Program. Please log in to continue.</p><br><br>
+        <p>If you are a provider, please click the button below to log in.</p><br>
+        <a href="ProviderLogin.html">
+            <input type="button" value="Provider Login">
+        </a><br><br><br>
 
-    <!-- Patient Login Form -->
-    Email: <input type="email" id="patient-login-email" placeholder="Email"><br>
-    Password: <input type="password" id="patient-login-password"><br>
-    <input type="checkbox" onclick="togglePassword()">Show Password<br>
-    <button onclick="loginPatient()">Log In</button>
+        <!-- Patient Login Form -->
+        Email: <input type="email" id="patient-login-email" placeholder="Email"><br>
+        Password: <input type="password" id="patient-login-password"><br>
+        <input type="checkbox" id="toggle-password-2" onclick="togglePassword()">
+        <label for="toggle-password-2">Show Password</label><br>
+        <button type="button" onclick="loginPatient()">Log In</button>
 
-    <p>Don't have an account? <a href="CreatePatientAccount.html">Create one here</a></p>
-    <p id="status"></p>
+        <p>Don't have an account? <a href="CreatePatientAccount.html">Create one here</a></p>
+        <p id="status"></p>
+        </div>
+      </form>
+    </div>
 
     <!-- Firebase Modular SDK -->
     <script type="module">
@@ -35,9 +43,8 @@
         appId: "1:812313529935:web:f4581c964bc30025eaa43a",
         measurementId: "G-CTRYEJZ7M3"
       };
-      //boots up connection to firebase
+
       const app = initializeApp(firebaseConfig);
-      //lets me use the firebase authentification app
       const auth = getAuth(app);
 
       // Login function

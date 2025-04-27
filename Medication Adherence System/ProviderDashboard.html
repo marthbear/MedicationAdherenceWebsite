@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Provider Dashboard</title>
-  <link rel="stylesheet" href="ProviderDashboard.css">
+  <link rel="stylesheet" href="med-style.css">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -52,37 +52,38 @@
 </head>
 
 <body>
-  <h1>Provider Dashboard</h1>
+  <div class="container">
+    <h1>Provider Dashboard</h1>
 
-  <!-- Manual Patient Linking -->
-  <section>
-    <h2>Link Patient by Email</h2>
-    <input type="email" id="manual-patient-email" placeholder="Patient Email">
-    <button onclick="linkPatientByEmail()">Link Patient</button>
-    <p id="manual-link-status"></p>
-  </section>
+    <!-- Manual Patient Linking -->
+    <section>
+      <h2>Link Patient by Email</h2>
+      <input type="email" id="manual-patient-email" placeholder="Patient Email">
+      <button onclick="linkPatientByEmail()">Link Patient</button>
+      <p id="manual-link-status"></p>
+    </section>
 
-  <!-- List of Linked Patients -->
-  <section>
-    <h2>Your Patients</h2>
-    <ul id="patient-list"></ul>
-    <p id="link-status"></p>
-  </section>
+    <!-- List of Linked Patients -->
+    <section>
+      <h2>Your Patients</h2>
+      <ul id="patient-list"></ul>
+      <p id="link-status"></p>
+    </section>
 
-  <!-- Prescription Section -->
-  <section id="prescription-section" style="display:none;">
-    <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
-    <input type="text" id="med-name" placeholder="Medicine Name"><br>
-    <input type="text" id="dosage" placeholder="Daily Dosage"><br>
-    <input type="text" id="dose-times" placeholder="Dose times (e.g. 08:00, 14:00)"><br>
-    <input type="date" id="start-date"><br>
-    <input type="date" id="end-date"><br>
-    <textarea id="med-description" placeholder="Description (e.g. what this is for)"></textarea><br>
-    <textarea id="doctor-notes" placeholder="Doctor's Notes (private notes)"></textarea><br>
-    <button onclick="createPrescription()">Add Prescription</button>
-    <p id="rx-status"></p>
-  </section>
-
+    <!-- Prescription Section -->
+    <section id="prescription-section" style="display:none;">
+      <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
+      <input type="text" id="med-name" placeholder="Medicine Name"><br>
+      <input type="text" id="dosage" placeholder="Daily Dosage"><br>
+      <input type="text" id="dose-times" placeholder="Dose times (e.g. 08:00, 14:00)"><br>
+      <input type="date" id="start-date"><br>
+      <input type="date" id="end-date"><br>
+      <textarea id="med-description" placeholder="Description (e.g. what this is for)"></textarea><br>
+      <textarea id="doctor-notes" placeholder="Doctor's Notes (private notes)"></textarea><br>
+      <button onclick="createPrescription()">Add Prescription</button>
+      <p id="rx-status"></p>
+    </section>
+  </div>
   <!-- Feedback Section -->
   <section id="feedback-section" style="display:none;">
     <h2>Patient Feedback for <span id="feedback-patient-name"></span></h2>

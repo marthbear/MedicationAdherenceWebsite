@@ -3,23 +3,31 @@
 <head>
     <title>Medication Adherence Program</title>
     <link rel="stylesheet" href="ProviderLogin.css">
+    <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
-    <h1>Provider Log In</h1>
-    <p>Welcome to the Medication Adherence Program. Please log in to continue.</p><br><br>
-    <p>If you are a patient, please click the button below to log in.</p><br>
-    <a href="PatientLogin.html">
-        <input type="button" value="Patient Login">
-    </a><br><br><br>
+    <div class="container">
+      <form>
+        <div class="form-group">
+        <h1>Provider Log In</h1>
+        <p>Welcome to the Medication Adherence Program. Please log in to continue.</p><br><br>
+        <p>If you are a patient, please click the button below to log in.</p><br>
+        <a href="PatientLogin.html">
+            <input type="button" value="Patient Login">
+        </a><br><br><br>
 
-    <!-- Provider Login Form -->
-    Email: <input type="email" id="provider-login-email" placeholder="Email"><br>
-    Password: <input type="password" id="provider-login-password"><br>
-    <input type="checkbox" onclick="togglePassword()">Show Password<br>
-    <button onclick="loginProvider()">Log In</button>
+        <!-- Provider Login Form -->
+        Email: <input type="email" id="provider-login-email" placeholder="Email"><br>
+        Password: <input type="password" id="provider-login-password"><br>
+        <input type="checkbox" id="toggle-password" onclick="togglePassword()">
+        <label for="toggle-password">Show Password</label><br>
+        <button type="button" onclick="loginProvider()">Log In</button>
 
-    <p>Don't have an account? <a href="CreateProviderAccount.html">Create one here</a></p>
-    <p id="status"></p>
+        <p>Don't have an account? <a href="CreateProviderAccount.html">Create one here</a></p>
+        <p id="status"></p>
+        </div>
+      </form>
+    </div>
 
     <!-- Modular Firebase SDK -->
     <script type="module">
@@ -62,4 +70,3 @@
     </script>
 </body>
 </html>
-
