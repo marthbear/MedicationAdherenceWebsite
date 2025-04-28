@@ -6,30 +6,315 @@
   <title>Patient Dashboard</title>
   <link rel="stylesheet" href="PatientDashboard.css">
   <style>
-    /* your existing inline calendar & modal styles… */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .calendar {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: block;
+    }
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .calendar-table td {
+      height: 120px;
+      width: 120px;
+      text-align: center;
+      vertical-align: top;
+      position: relative;
+      border: 1px solid #ccc;
+    }
+    .calendar-table th {
+      height: 40px;
+    }
+    .month-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .month-year {
+      font-size: 24px;
+      margin: 0 20px;
+    }
+    .prev, .next {
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .med-box {
+      background-color: #ADD8E6;
+      margin: 2px 0;
+      padding: 2px 4px;
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .med-box:hover {
+      background-color: #87CEEB;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      width: 300px;
+      border-radius: 8px;
+    }
+    .modal.show {
+      display: block;
+    }
+    .modal .modal-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal button {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .modal button:hover {
+      background-color: #45a049;
+    }
   </style>
-  <link rel="stylesheet" href="med-style.css">
 </head>
 
 <body>
-  <div class="container">
-    <h1>Patient Dashboard</h1>
-    <button onclick="window.location.href='PatientAdherence.html'">View Adherence Tracker</button>
+  <h1>Patient Dashboard</h1>
+  <button onclick="window.location.href='PatientAdherence.html'">View Adherence Tracker</button>
 
-    <!-- Calendar Section -->
-    <div class="calendar">
-      <!-- … -->
+
+  <!-- Calendar Section -->
+  <div class="calendar">
+    <div class="month-header">
+      <button class="prev">&lt;</button>
+      <span class="month-year"></span>
+      <button class="next">&gt;</button>
     </div>
+    <table class="calendar-table">
+      <thead>
+        <tr>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-    <!-- Modal for Medication Details -->
-    <div id="medication-modal" class="modal">
-      <!-- … -->
+  <!-- Modal for Medication Details -->
+  <div id="medication-modal" class="modal">
+    <div class="modal-content">
+      <h2 id="medication-title"></h2>
+      <p><strong>Medicine:</strong> <span id="medication-name"></span></p>
+      <p><strong>Dosage:</strong> <span id="medication-dosage"></span></p>
+      <p><strong>Description:</strong> <span id="medication-description"></span></p>
+      <p><strong>Doctor's Notes:</strong> <span id="medication-notes"></span></p>
+      <button id="mark-taken-btn">Mark as Taken</button>
     </div>
   </div>
 
   <!-- Firebase Script -->
   <script type="module">
-    /* your existing JS… */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
+      authDomain: "medicationadherencewebsite.firebaseapp.com",
+      projectId: "medicationadherencewebsite",
+      storageBucket: "medicationadherencewebsite.appspot.com",
+      messagingSenderId: "812313529935",
+      appId: "1:812313529935:web:f4581c964bc30025eaa43a",
+      measurementId: "G-CTRYEJZ7M3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+      console.error("Persistence error:", error);
+    });
+
+    let patientUID = null;
+    let currentDate = new Date();
+    let selectedDose = null;
+    let selectedMedBox = null;
+
+    const calendarTable = document.querySelector('.calendar-table tbody');
+    const monthYearDisplay = document.querySelector('.month-year');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    const modal = document.getElementById('medication-modal');
+    const medicationTitle = document.getElementById('medication-title');
+    const medicationName = document.getElementById('medication-name');
+    const medicationDosage = document.getElementById('medication-dosage');
+    const medicationDescription = document.getElementById('medication-description');
+    const medicationNotes = document.getElementById('medication-notes');
+    const markTakenBtn = document.getElementById('mark-taken-btn');
+
+    async function loadPrescriptions() {
+  if (!patientUID) return;
+
+  const prescriptions = [];
+
+  const prescriptionsRef = collection(db, `users/${patientUID}/prescriptions`);
+  const snapshot = await getDocs(prescriptionsRef);
+
+  snapshot.forEach(docSnap => {
+    prescriptions.push({ 
+      ...docSnap.data(), 
+      id: docSnap.id,
+      doseDates: Array.isArray(docSnap.data().doseDates) ? docSnap.data().doseDates : [],
+      takenDates: Array.isArray(docSnap.data().takenDates) ? docSnap.data().takenDates : []
+    });
+  });
+
+  console.log("Loaded prescriptions:", prescriptions);
+
+  displayPrescriptionsOnCalendar(prescriptions);
+}
+
+
+
+    function renderCalendar(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+
+      monthYearDisplay.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+
+      calendarTable.innerHTML = '';
+      let row = document.createElement('tr');
+      let day = firstDay.getDay();
+
+      for (let i = 0; i < day; i++) {
+        row.appendChild(document.createElement('td'));
+      }
+
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+        const cell = document.createElement('td');
+        cell.textContent = i;
+        cell.setAttribute('data-date', `${year}-${(month+1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`);
+        row.appendChild(cell);
+        day++;
+
+        if (day % 7 === 0) {
+          calendarTable.appendChild(row);
+          row = document.createElement('tr');
+        }
+      }
+
+      if (row.children.length > 0) {
+        while (row.children.length < 7) {
+          row.appendChild(document.createElement('td'));
+        }
+        calendarTable.appendChild(row);
+      }
+    }
+
+    function displayPrescriptionsOnCalendar(prescriptions) {
+      const calendarCells = document.querySelectorAll('.calendar-table td');
+
+      prescriptions.forEach(prescription => {
+        const doseDates = prescription.doseDates || [];
+        const takenDates = prescription.takenDates || [];
+
+        doseDates.forEach(doseDate => {
+          const cell = [...calendarCells].find(td => td.dataset.date === doseDate);
+          if (cell) {
+            const medBox = document.createElement('div');
+            medBox.classList.add('med-box');
+            medBox.textContent = prescription.medicine;
+
+            if (takenDates.includes(doseDate)) {
+              medBox.style.backgroundColor = "#d3d3d3";
+              medBox.style.textDecoration = "line-through";
+              medBox.style.pointerEvents = "none";
+            }
+
+            medBox.onclick = () => showPrescriptionDetails(doseDate, prescription, medBox);
+
+            cell.appendChild(medBox);
+          }
+        });
+      });
+    }
+
+    function showPrescriptionDetails(date, prescription, medBox) {
+      medicationTitle.textContent = `Medication for ${date}`;
+      medicationName.textContent = prescription.medicine;
+      medicationDosage.textContent = prescription.dosage;
+      medicationDescription.textContent = prescription.description || "No description.";
+      medicationNotes.textContent = prescription.doctorNotes || "No notes.";
+      modal.classList.add('show');
+
+      selectedDose = { date, prescriptionId: prescription.id };
+      selectedMedBox = medBox;
+    }
+
+    markTakenBtn.addEventListener('click', async () => {
+      modal.classList.remove('show');
+      if (selectedMedBox && selectedDose) {
+        selectedMedBox.style.backgroundColor = "#d3d3d3";
+        selectedMedBox.style.textDecoration = "line-through";
+        selectedMedBox.style.pointerEvents = "none";
+
+        try {
+          const prescriptionRef = doc(db, `users/${patientUID}/prescriptions/${selectedDose.prescriptionId}`);
+          await updateDoc(prescriptionRef, {
+            takenDates: arrayUnion(selectedDose.date)
+          });
+        } catch (error) {
+          console.error("Error updating takenDates: ", error);
+        }
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar(currentDate);
+      loadPrescriptions();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar(currentDate);
+      loadPrescriptions();
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        patientUID = user.uid;
+        renderCalendar(currentDate);
+        loadPrescriptions();
+      } else {
+        console.log("Not logged in.");
+      }
+    });
   </script>
 </body>
 </html>
