@@ -44,7 +44,7 @@
     .red {
       background-color: #F44336;
     }
-    button {
+    a button {
       margin-top: 20px;
       padding: 10px 20px;
       background-color: #4285f4;
@@ -52,8 +52,9 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      text-decoration: none;
     }
-    button:hover {
+    a button:hover {
       background-color: #3367d6;
     }
   </style>
@@ -64,7 +65,10 @@
 
   <div id="prescriptions-container"></div>
 
-  <button onclick="goBack()">Back to Dashboard</button>
+  <!-- Simple link back to dashboard -->
+  <a href="PatientDashboard.html">
+    <button>Back to Dashboard</button>
+  </a>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -90,10 +94,6 @@
     });
 
     const prescriptionsContainer = document.getElementById('prescriptions-container');
-
-    function goBack() {
-      window.location.href = "PatientDashboard.html";
-    }
 
     async function loadPrescriptions(patientUID) {
       const prescriptionsRef = collection(db, `users/${patientUID}/prescriptions`);
@@ -121,9 +121,19 @@
       }
 
       prescriptions.forEach(prescription => {
-        const totalDoses = prescription.doseDates.length;
-        const takenDoses = prescription.takenDates.length;
-        const adherence = totalDoses > 0 ? Math.round((takenDoses / totalDoses) * 100) : 0;
+        const today = new Date();
+        
+        const dosesUpToToday = (prescription.doseDates || []).filter(dateStr => {
+          const doseDate = new Date(dateStr);
+          return doseDate <= today;
+        }).length;
+
+        const takenDosesUpToToday = (prescription.takenDates || []).filter(dateStr => {
+          const doseDate = new Date(dateStr);
+          return doseDate <= today;
+        }).length;
+
+        const adherence = dosesUpToToday > 0 ? Math.round((takenDosesUpToToday / dosesUpToToday) * 100) : 0;
 
         const colorClass = adherence >= 90 ? 'green' : (adherence >= 70 ? 'yellow' : 'red');
 

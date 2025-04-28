@@ -68,7 +68,7 @@
       font-size: 0.9em;
       margin-top: 5px;
     }
-    button.back-btn {
+    a button.back-btn {
       margin-top: 20px;
       padding: 10px 20px;
       background-color: #4285f4;
@@ -76,8 +76,9 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      text-decoration: none;
     }
-    button.back-btn:hover {
+    a button.back-btn:hover {
       background-color: #3367d6;
     }
   </style>
@@ -88,7 +89,10 @@
 
   <div id="prescriptions-container"></div>
 
-  <button class="back-btn" onclick="goBack()">Back to Dashboard</button>
+  <!-- Updated: Use normal <a> link for back button -->
+  <a href="PatientDashboard.html">
+    <button class="back-btn">Back to Dashboard</button>
+  </a>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -114,10 +118,6 @@
     });
 
     const prescriptionsContainer = document.getElementById('prescriptions-container');
-
-    function goBack() {
-      window.location.href = "PatientDashboard.html";
-    }
 
     async function loadPrescriptions(patientUID) {
       const prescriptionsRef = collection(db, `users/${patientUID}/prescriptions`);
