@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Medication Adherence Program</title>
-    <link rel="stylesheet" href="ProviderLogin.css">
+  <title>Provider Log In</title>
+  <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
+  <div class="container">
     <h1>Provider Log In</h1>
     <p>Welcome to the Medication Adherence Program. Please log in to continue.</p><br><br>
     <p>If you are a patient, please click the button below to log in.</p><br>
-    <a href="PatientLogin.html">
-        <input type="button" value="Patient Login">
-    </a><br><br><br>
+    <a href="PatientLogin.html" class="link-button">Patient Login</a><br><br><br>
 
     <!-- Provider Login Form -->
     Email: <input type="email" id="provider-login-email" placeholder="Email"><br>
@@ -21,7 +20,6 @@
     <p>Don't have an account? <a href="CreateProviderAccount.html">Create one here</a></p>
     <p id="status"></p>
 
-    <!-- Modular Firebase SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
       import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";

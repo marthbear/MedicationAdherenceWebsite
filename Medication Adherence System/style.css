@@ -1,0 +1,204 @@
+/* Import a pixel-style font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Reset some basics */
+* {
+    box-sizing: border-box;
+}
+  
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', monospace;
+    /* full-screen cover*/
+    background: url(assets/med-bg.jpg) center center / cover no-repeat fixed;
+    color: #ffffff;
+    text-shadow:
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000;
+}
+  
+/* Style for the “Add a Game” header */
+h1 {
+    font-family: 'Press Start 2P', monospace; /* pixel style */
+    font-weight: bold;
+    font-size: 2rem;
+    color: #fff;
+    text-align: center;
+    text-shadow:
+      -2px -2px 0 #000,
+       2px -2px 0 #000,
+      -2px  2px 0 #000,
+       2px  2px 0 #000;
+    margin-bottom: 1em;
+}
+  
+h2 {
+    font-family: 'Press Start 2P', monospace; /* pixel style */
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #fff;
+    text-align: center;
+    text-shadow:
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000;
+    margin-bottom: 1em;
+}
+/* Center and style the form container */
+form {
+    max-width: 600px;
+    margin: 5% auto;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+  
+/* Labels */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+  
+/* Inputs, selects, textareas */
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+  
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #0066cc;
+    outline: none;
+    box-shadow: 0 0 6px rgba(0, 102, 204, 0.5);
+}
+  
+/* Buttons */
+button {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace; /* pixel style */
+    font-weight: bold;
+    background-color: #e0e0e0;
+    color: #000000;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    text-shadow: none;
+    border: 2px solid #000; /* use solid border instead of 'border:16px' */
+}
+  
+button:hover {
+    background-color: #949494;
+    transform: translateY(-2px);
+}
+  
+button:active {
+    background-color: #ffffff;
+    transform: translateY(0);
+}
+  
+/* Optional: style links */
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+  
+a:hover {
+    text-decoration: underline;
+}
+  
+/* Button-style link */
+a.btn {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace;
+    font-weight: bold;
+    background-color: #e0e0e0;
+    color: #000000;
+    text-decoration: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    text-shadow: none;
+    border-radius: 4px;
+    border: 2px solid #000;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-bottom: 16px;
+}
+  
+a.btn:hover {
+    background-color: #949494;
+    transform: translateY(-2px);
+}
+  
+a.btn:active {
+    background-color: #ffffff;
+    transform: translateY(0);
+}
+
+/* ---------------------------------------------------
+   Classic FF frame + adjustable blue fill
+   --------------------------------------------------- */
+.menu-frame {
+    border: 3px solid transparent;
+    border-image-source: url('../assets/FFBG-Border.png');
+    border-image-slice: 3;
+    border-image-repeat: stretch;
+    background: url('../assets/FFBG-Blue.png') center center / 100% 100% no-repeat;
+    padding: 12px;
+    box-sizing: border-box;
+    display: block;
+}
+
+/* Horizontal variant for wide listings */
+.menu-frame-horizontal {
+    padding: 12px 32px;
+    margin: 2% auto;
+    width: 100%;
+    max-width: 3000px;
+}
+
+/* Smaller Edit/Delete buttons in game list */
+table.game-list a.btn,
+table.game-list button {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+}
+
+.button-frame {
+  background: transparent;
+  padding: 12px;
+  display: block;
+}
+
+/* Add near the top of style.css */
+.search-form {
+    max-width: 600px;
+    margin: 2% auto 1em;
+    text-align: center;
+  }
+  .search-form input[type="text"] {
+    width: 60%;
+    padding: 8px;
+    margin-right: 8px;
+    font-size: 1rem;
+  }
+  .search-form button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  

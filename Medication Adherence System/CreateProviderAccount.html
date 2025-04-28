@@ -2,20 +2,21 @@
 <html>
 <head>
   <title>Create Provider Account</title>
-  <link rel="stylesheet" href="createProviderAccount.css">
+  <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
-  <h1>Medication Adherence Program</h1><br><br>
-  <h2>Create Provider Account</h2>
+  <div class="container">
+    <h1>Medication Adherence Program</h1>
+    <h2>Create Provider Account</h2>
 
-  First Name: <input type="text" id="provider-firstname" placeholder="First Name"><br>
-  Last Name: <input type="text" id="provider-lastname" placeholder="Last Name"><br>
-  Email: <input type="email" id="provider-email" placeholder="Email"><br>
-  Password: <input type="password" id="provider-password"><br>
-  <input type="checkbox" onclick="togglePassword()">Show Password<br>
-  <button onclick="createProviderAccount()">Sign Up</button>
+    First Name: <input type="text" id="provider-firstname" placeholder="First Name"><br>
+    Last Name: <input type="text" id="provider-lastname" placeholder="Last Name"><br>
+    Email: <input type="email" id="provider-email" placeholder="Email"><br>
+    Password: <input type="password" id="provider-password"><br>
+    <input type="checkbox" onclick="togglePassword()">Show Password<br>
+    <button onclick="createProviderAccount()">Sign Up</button>
 
-  <p id="status"></p>
+    <p id="status"></p>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -65,5 +66,6 @@
       pw.type = pw.type === "password" ? "text" : "password";
     };
   </script>
+  </div>
 </body>
 </html>

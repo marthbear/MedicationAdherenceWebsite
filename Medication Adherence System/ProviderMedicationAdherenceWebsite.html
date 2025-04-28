@@ -1,26 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Provider Medication Adherence Website</title>
-    <link rel="stylesheet" href="ProviderMedicationAdherenceWebsite.css">
+  <title>Provider Medication Adherence Website</title>
+  <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
+  <div class="container">
     <h1>Medication Adherence Program</h1>
 
     <!-- ====== Prescription Entry Form ====== -->
     <p>Enter new prescription here:</p>
     <form id="medicineForm">
-        <!-- Input for the name of the medicine -->
-        Medicine Name: <input type="text" id="medicine"><br>
-
-        <!-- Input for how much should be taken daily -->
-        Daily Dosage: <input type="text" id="dosage"><br>
-
-        <!-- Input for what times during the day the medicine is taken -->
-        Dose times (Military Time): <input type="text" id="doseTime"><br><br>
-
-        <!-- Button that triggers JavaScript function newPrescription() -->
-        <input type="button" onclick="newPrescription()" value="Submit"><br><br><br>
+      Medicine Name: <input type="text" id="medicine"><br>
+      Daily Dosage: <input type="text" id="dosage"><br>
+      Dose times (Military Time): <input type="text" id="doseTime"><br><br>
+      <input type="button" onclick="newPrescription()" value="Submit"><br><br><br>
     </form>
 
     <!-- ====== Section to display saved prescriptions ====== -->
@@ -108,5 +102,6 @@
         // This ensures saved prescriptions appear immediately
         window.onload = displayPrescriptions;
     </script>
+  </div>
 </body>
 </html>
