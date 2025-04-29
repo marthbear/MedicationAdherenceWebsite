@@ -2,105 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Provider Dashboard</title>
-  <link rel="stylesheet" href="ProviderDashboard.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      margin: 10px 0;
-      cursor: pointer;
-    }
-    section {
-      margin: 20px 0;
-    }
-    input, textarea {
-      margin: 5px 0;
-      padding: 8px;
-      width: 250px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover {
-      background-color: #3367d6;
-    }
-    .prescription-card {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      margin: 10px auto;
-      max-width: 600px;
-      text-align: left;
-      background-color: #f9f9f9;
-    }
-  </style>
+  <link rel="stylesheet" href="med-style.css">
 </head>
-
 <body>
-  <h1>Provider Dashboard</h1>
+  <div class="container">
+    <h1>Provider Dashboard</h1>
 
-  <!-- Manual Patient Linking -->
-  <section>
+    <!-- Manual Patient Linking -->
     <h2>Link Patient by Email</h2>
-    <input type="email" id="manual-patient-email" placeholder="Patient Email">
-    <button onclick="linkPatientByEmail()">Link Patient</button>
-    <p id="manual-link-status"></p>
-  </section>
+    <div class="form-group">
+      <label for="manual-patient-email">Patient Email</label>
+      <input type="email" id="manual-patient-email" class="form-input" placeholder="Email">
+    </div>
+    <div class="portal">
+      <button id="link-patient-button">Link Patient</button>
+    </div>
+    <p id="manual-link-status" class="status-message"></p>
 
-  <!-- List of Linked Patients -->
-  <section>
+    <!-- List of Linked Patients -->
     <h2>Your Patients</h2>
     <ul id="patient-list"></ul>
-    <p id="link-status"></p>
-  </section>
+    <p id="link-status" class="status-message"></p>
 
-  <!-- Prescription Section -->
-  <section id="prescription-section" style="display:none;">
-    <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
-    <input type="text" id="med-name" placeholder="Medicine Name"><br>
-    <input type="text" id="dosage" placeholder="Daily Dosage"><br>
-    <input type="text" id="dose-times" placeholder="Dose times (e.g. 08:00, 14:00)"><br>
-    <input type="date" id="start-date"><br>
-    <input type="date" id="end-date"><br>
-    <textarea id="med-description" placeholder="Description (e.g. what this is for)"></textarea><br>
-    <textarea id="doctor-notes" placeholder="Doctor's Notes (private notes)"></textarea><br>
-    <button onclick="createPrescription()">Add Prescription</button>
-    <p id="rx-status"></p>
-  </section>
+    <!-- Prescription Section -->
+    <section id="prescription-section" class="hidden">
+      <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
+      
+      <div class="form-group">
+        <label for="med-name">Medicine Name</label>
+        <input type="text" id="med-name" class="form-input" placeholder="Medicine Name">
+      </div>
+      <div class="form-group">
+        <label for="dosage">Daily Dosage</label>
+        <input type="text" id="dosage" class="form-input" placeholder="Daily Dosage">
+      </div>
+      <div class="form-group">
+        <label for="dose-times">Dose Times</label>
+        <input type="text" id="dose-times" class="form-input" placeholder="e.g. 08:00, 14:00">
+      </div>
+      <div class="form-group">
+        <label for="start-date">Start Date</label>
+        <input type="date" id="start-date" class="form-input">
+      </div>
+      <div class="form-group">
+        <label for="end-date">End Date</label>
+        <input type="date" id="end-date" class="form-input">
+      </div>
+      <div class="form-group">
+        <label for="med-description">Description</label>
+        <textarea id="med-description" class="form-input" placeholder="What this is for"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="doctor-notes">Doctor’s Notes</label>
+        <textarea id="doctor-notes" class="form-input" placeholder="Private notes"></textarea>
+      </div>
 
-  <!-- Feedback Section -->
-  <section id="feedback-section" style="display:none;">
-    <h2>Patient Feedback for <span id="feedback-patient-name"></span></h2>
-    <div id="feedback-list"></div>
-  </section>
+      <button id="create-prescription-button">Add Prescription</button>
+      <p id="rx-status" class="status-message"></p>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="feedback-section" class="hidden">
+      <h2>Patient Feedback for <span id="feedback-patient-name"></span></h2>
+      <div id="feedback-list"></div>
+    </section>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import {
-      getFirestore,
-      collection,
-      getDocs,
-      addDoc,
-      setDoc,
-      doc,
-      query,
-      where
+      getFirestore, collection, getDocs,
+      addDoc, setDoc, doc, query, where
     } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -112,98 +87,81 @@
       appId: "1:812313529935:web:f4581c964bc30025eaa43a",
       measurementId: "G-CTRYEJZ7M3"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let providerUID = null;
-    let selectedPatientUID = null;
-    let selectedPatientName = "";
+    let providerUID = null,
+        selectedPatientUID = null;
 
-    const patientList = document.getElementById('patient-list');
-    const prescriptionSection = document.getElementById('prescription-section');
-    const selectedPatientNameSpan = document.getElementById('selected-patient-name');
-    const feedbackSection = document.getElementById('feedback-section');
-    const feedbackPatientNameSpan = document.getElementById('feedback-patient-name');
-    const feedbackList = document.getElementById('feedback-list');
-
-    function clearSelection() {
-      selectedPatientUID = null;
-      selectedPatientName = "";
-      prescriptionSection.style.display = "none";
-      feedbackSection.style.display = "none";
-    }
-
-    // Link patient manually by email
+    // --- Declare functions first ---
     window.linkPatientByEmail = async function () {
       const email = document.getElementById("manual-patient-email").value;
-
+      const statusEl = document.getElementById("manual-link-status");
       const usersQuery = query(
         collection(db, "users"),
         where("email", "==", email),
         where("role", "==", "patient")
       );
-
       const result = await getDocs(usersQuery);
 
       if (!result.empty) {
-        const patientDoc = result.docs[0];
-        const patientUID = patientDoc.id;
-        const patientData = patientDoc.data();
-
-        await setDoc(doc(db, `users/${providerUID}/linkedPatients/${patientUID}`), {
-          patientEmail: patientData.email,
-          patientFirstName: patientData.firstName,
-          patientLastName: patientData.lastName
-        });
-
-        document.getElementById("manual-link-status").textContent = `Linked to patient: ${patientData.firstName} ${patientData.lastName}`;
+        const patDoc = result.docs[0];
+        const patData = patDoc.data();
+        await setDoc(
+          doc(db, `users/${providerUID}/linkedPatients/${patDoc.id}`),
+          {
+            patientEmail: patData.email,
+            patientFirstName: patData.firstName,
+            patientLastName: patData.lastName
+          }
+        );
+        statusEl.textContent = `Linked to patient: ${patData.firstName} ${patData.lastName}`;
         loadLinkedPatients();
       } else {
-        document.getElementById("manual-link-status").textContent = "No patient found with that email.";
+        statusEl.textContent = "No patient found with that email.";
       }
     };
 
     async function loadLinkedPatients() {
       if (!providerUID) return;
-
-      const linkedRef = collection(db, `users/${providerUID}/linkedPatients`);
-      const snapshot = await getDocs(linkedRef);
-
-      patientList.innerHTML = '';
+      const snapshot = await getDocs(
+        collection(db, `users/${providerUID}/linkedPatients`)
+      );
+      const list = document.getElementById('patient-list');
+      list.innerHTML = '';
+      document.getElementById('link-status').textContent = '';
 
       if (snapshot.empty) {
-        patientList.innerHTML = '<li>No patients linked yet.</li>';
+        list.innerHTML = '<li>No patients linked yet.</li>';
         return;
       }
-
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const li = document.createElement('li');
         li.textContent = `${data.patientFirstName} ${data.patientLastName} (${data.patientEmail})`;
-        li.onclick = () => selectPatient(docSnap.id, `${data.patientFirstName} ${data.patientLastName}`);
-        patientList.appendChild(li);
+        li.addEventListener('click', () =>
+          selectPatient(docSnap.id, `${data.patientFirstName} ${data.patientLastName}`)
+        );
+        list.appendChild(li);
       });
     }
 
     window.selectPatient = function (uid, name) {
       selectedPatientUID = uid;
-      selectedPatientName = name;
-      selectedPatientNameSpan.textContent = name;
-      feedbackPatientNameSpan.textContent = name;
-      prescriptionSection.style.display = "block";
-      feedbackSection.style.display = "block";
+      document.getElementById('selected-patient-name').textContent = name;
+      document.getElementById('feedback-patient-name').textContent = name;
+      document.getElementById('link-status').textContent = `Selected patient: ${name}`;
+      document.getElementById('prescription-section').classList.remove('hidden');
+      document.getElementById('feedback-section').classList.remove('hidden');
       loadFeedback(uid);
-      document.getElementById("link-status").textContent = `Selected patient: ${name}`;
     };
 
-    window.createPrescription = async function () {
+    async function createPrescription() {
       if (!selectedPatientUID) {
         document.getElementById("rx-status").textContent = "No patient selected.";
         return;
       }
-
       const med = document.getElementById("med-name").value;
       const dosage = document.getElementById("dosage").value;
       const times = document.getElementById("dose-times").value;
@@ -211,54 +169,52 @@
       const notes = document.getElementById("doctor-notes").value;
       const startDate = document.getElementById("start-date").value;
       const endDate = document.getElementById("end-date").value;
+      const statusEl = document.getElementById("rx-status");
 
       if (!startDate || !endDate) {
-        document.getElementById("rx-status").textContent = "Please provide both start and end dates.";
+        statusEl.textContent = "Please provide both start and end dates.";
         return;
       }
 
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
       const doseDates = [];
-      let currentDate = start;
-
-      while (currentDate <= end) {
-        doseDates.push(currentDate.toISOString().split('T')[0]);
-        currentDate.setDate(currentDate.getDate() + 1);
+      let d = new Date(startDate), end = new Date(endDate);
+      while (d <= end) {
+        doseDates.push(d.toISOString().split('T')[0]);
+        d.setDate(d.getDate() + 1);
       }
 
       try {
-        await addDoc(collection(db, `users/${selectedPatientUID}/prescriptions`), {
-          medicine: med,
-          dosage: dosage,
-          doseTimes: times.split(",").map(t => t.trim()),
-          description: description,
-          doctorNotes: notes,
-          startDate: startDate,
-          endDate: endDate,
-          doseDates: doseDates,
-          takenDates: [],
-          createdAt: new Date()
-        });
-
-        document.getElementById("rx-status").textContent = "Prescription added!";
+        await addDoc(
+          collection(db, `users/${selectedPatientUID}/prescriptions`),
+          {
+            medicine: med,
+            dosage,
+            doseTimes: times.split(',').map(t => t.trim()),
+            description,
+            doctorNotes: notes,
+            startDate,
+            endDate,
+            doseDates,
+            takenDates: [],
+            createdAt: new Date()
+          }
+        );
+        statusEl.textContent = "Prescription added!";
       } catch (err) {
-        document.getElementById("rx-status").textContent = "Error: " + err.message;
+        statusEl.textContent = "Error: " + err.message;
       }
-    };
+    }
 
     async function loadFeedback(patientUID) {
-      const prescriptionsRef = collection(db, `users/${patientUID}/prescriptions`);
-      const snapshot = await getDocs(prescriptionsRef);
-
+      const snapshot = await getDocs(
+        collection(db, `users/${patientUID}/prescriptions`)
+      );
+      const feedbackList = document.getElementById('feedback-list');
       feedbackList.innerHTML = '';
-
       if (snapshot.empty) {
         feedbackList.innerHTML = '<p>No prescriptions found.</p>';
         return;
       }
-
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const card = document.createElement('div');
@@ -266,13 +222,19 @@
         card.innerHTML = `
           <h3>${data.medicine}</h3>
           <p><strong>Dosage:</strong> ${data.dosage}</p>
-          <p><strong>Patient Feedback:</strong> ${data.patientFeedback ? data.patientFeedback : "No feedback yet."}</p>
+          <p><strong>Patient Feedback:</strong> ${data.patientFeedback || "No feedback yet."}</p>
         `;
         feedbackList.appendChild(card);
       });
     }
 
-    onAuthStateChanged(auth, (user) => {
+    // --- Now wire up the buttons ---
+    document.getElementById('link-patient-button')
+      .addEventListener('click', window.linkPatientByEmail);
+    document.getElementById('create-prescription-button')
+      .addEventListener('click', createPrescription);
+
+    onAuthStateChanged(auth, user => {
       if (user) {
         providerUID = user.uid;
         loadLinkedPatients();

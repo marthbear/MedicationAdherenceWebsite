@@ -1,65 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Medication Adherence Program</title>
-    <link rel="stylesheet" href="PatientLogin.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patient Log In</title>
+  <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
+  <div class="container">
     <h1>Patient Log In</h1>
-    <p>Welcome to the Medication Adherence Program. Please log in to continue.</p><br><br>
-    <p>If you are a provider, please click the button below to log in.</p><br>
-    <a href="ProviderLogin.html">
-        <input type="button" value="Provider Login">
-    </a><br><br><br>
+    <p>Welcome to the Medication Adherence Program. Please log in to continue.</p>
 
-    <!-- Patient Login Form -->
-    Email: <input type="email" id="patient-login-email" placeholder="Email"><br>
-    Password: <input type="password" id="patient-login-password"><br>
-    <input type="checkbox" onclick="togglePassword()">Show Password<br>
-    <button onclick="loginPatient()">Log In</button>
+    <div class="portal">
+      <a class="link-button" href="ProviderLogin.html">Provider Login</a>
+    </div>
 
-    <p>Don't have an account? <a href="CreatePatientAccount.html">Create one here</a></p>
-    <p id="status"></p>
+    <div class="form-group">
+      <label for="patient-login-email">Email</label>
+      <input type="email" id="patient-login-email" class="form-input" placeholder="Email">
+    </div>
 
-    <!-- Firebase Modular SDK -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    <div class="form-group">
+      <label for="patient-login-password">Password</label>
+      <input type="password" id="patient-login-password" class="form-input">
+    </div>
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
-        authDomain: "medicationadherencewebsite.firebaseapp.com",
-        projectId: "medicationadherencewebsite",
-        storageBucket: "medicationadherencewebsite.appspot.com",
-        messagingSenderId: "812313529935",
-        appId: "1:812313529935:web:f4581c964bc30025eaa43a",
-        measurementId: "G-CTRYEJZ7M3"
-      };
-      //boots up connection to firebase
-      const app = initializeApp(firebaseConfig);
-      //lets me use the firebase authentification app
-      const auth = getAuth(app);
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="toggle-password-checkbox"> Show Password
+      </label>
+    </div>
 
-      // Login function
-      window.loginPatient = function () {
-        const email = document.getElementById("patient-login-email").value;
-        const password = document.getElementById("patient-login-password").value;
+    <button id="login-button">Log In</button>
+
+    <!-- restored create-account link -->
+    <p>Don't have an account? 
+      <a href="CreatePatientAccount.html">
+        Create one here
+      </a>
+    </p>
+
+    <p id="status" class="status-message"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZDjkaKRvrwkwo5R4VxMGmX8pRf_pyJyU",
+      authDomain: "medicationadherencewebsite.firebaseapp.com",
+      projectId: "medicationadherencewebsite",
+      storageBucket: "medicationadherencewebsite.appspot.com",
+      messagingSenderId: "812313529935",
+      appId: "1:812313529935:web:f4581c964bc30025eaa43a",
+      measurementId: "G-CTRYEJZ7M3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById('toggle-password-checkbox')
+      .addEventListener('change', () => {
+        const pw = document.getElementById('patient-login-password');
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+      });
+
+    document.getElementById('login-button')
+      .addEventListener('click', () => {
+        const email = document.getElementById('patient-login-email').value;
+        const password = document.getElementById('patient-login-password').value;
+        const statusEl = document.getElementById('status');
 
         signInWithEmailAndPassword(auth, email, password)
           .then(() => {
-            document.getElementById("status").textContent = "Logged in!";
-            window.location.href = "PatientDashboard.html";
+            statusEl.textContent = 'Logged in!';
+            window.location.href = 'PatientDashboard.html';
           })
-          .catch(error => {
-            document.getElementById("status").textContent = error.message;
+          .catch(err => {
+            statusEl.textContent = err.message;
           });
-      }
-
-      // Toggle password visibility
-      window.togglePassword = function () {
-        const pw = document.getElementById("patient-login-password");
-        pw.type = pw.type === "password" ? "text" : "password";
-      }
-    </script>
+      });
+  </script>
 </body>
 </html>

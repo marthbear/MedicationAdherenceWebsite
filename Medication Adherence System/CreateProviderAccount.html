@@ -1,21 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Create Provider Account</title>
-  <link rel="stylesheet" href="createProviderAccount.css">
+  <link rel="stylesheet" href="med-style.css">
 </head>
 <body>
-  <h1>Medication Adherence Program</h1><br><br>
-  <h2>Create Provider Account</h2>
+  <div class="container">
+    <h1>Medication Adherence Program</h1>
+    <h2>Create Provider Account</h2>
 
-  First Name: <input type="text" id="provider-firstname" placeholder="First Name"><br>
-  Last Name: <input type="text" id="provider-lastname" placeholder="Last Name"><br>
-  Email: <input type="email" id="provider-email" placeholder="Email"><br>
-  Password: <input type="password" id="provider-password"><br>
-  <input type="checkbox" onclick="togglePassword()">Show Password<br>
-  <button onclick="createProviderAccount()">Sign Up</button>
+    <div class="form-group">
+      <label for="provider-firstname">First Name</label>
+      <input type="text" id="provider-firstname" class="form-input" placeholder="First Name">
+    </div>
 
-  <p id="status"></p>
+    <div class="form-group">
+      <label for="provider-lastname">Last Name</label>
+      <input type="text" id="provider-lastname" class="form-input" placeholder="Last Name">
+    </div>
+
+    <div class="form-group">
+      <label for="provider-email">Email</label>
+      <input type="email" id="provider-email" class="form-input" placeholder="Email">
+    </div>
+
+    <div class="form-group">
+      <label for="provider-password">Password</label>
+      <input type="password" id="provider-password" class="form-input" placeholder="Password">
+    </div>
+
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="toggle-password-checkbox"> Show Password
+      </label>
+    </div>
+
+    <button id="signup-button">Sign Up</button>
+    <p id="status" class="status-message"></p>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -36,34 +60,39 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    window.createProviderAccount = async function () {
-      const email = document.getElementById("provider-email").value;
-      const password = document.getElementById("provider-password").value;
-      const firstName = document.getElementById("provider-firstname").value;
-      const lastName = document.getElementById("provider-lastname").value;
+    // Toggle password visibility
+    document.getElementById('toggle-password-checkbox')
+      .addEventListener('change', () => {
+        const pw = document.getElementById('provider-password');
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+      });
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+    // Handle sign up
+    document.getElementById('signup-button')
+      .addEventListener('click', async () => {
+        const firstName = document.getElementById('provider-firstname').value;
+        const lastName  = document.getElementById('provider-lastname').value;
+        const email     = document.getElementById('provider-email').value;
+        const password  = document.getElementById('provider-password').value;
+        const statusEl  = document.getElementById('status');
 
-        await setDoc(doc(db, "users", user.uid), {
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          role: "provider"
-        });
+        try {
+          const userCred = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCred.user;
 
-        document.getElementById("status").textContent = "Account created!";
-        window.location.href = "ProviderLogin.html";
-      } catch (error) {
-        document.getElementById("status").textContent = error.message;
-      }
-    };
+          await setDoc(doc(db, "users", user.uid), {
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            role: "provider"
+          });
 
-    window.togglePassword = function () {
-      const pw = document.getElementById("provider-password");
-      pw.type = pw.type === "password" ? "text" : "password";
-    };
+          statusEl.textContent = "Account created!";
+          window.location.href = "ProviderLogin.html";
+        } catch (err) {
+          statusEl.textContent = err.message;
+        }
+      });
   </script>
 </body>
 </html>

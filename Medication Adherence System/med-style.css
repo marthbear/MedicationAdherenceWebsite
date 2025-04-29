@@ -18,7 +18,18 @@ body {
   background-position: center;
   color: #333;
 }
-
+h1 {
+  font-size: 2.5rem;
+  color: #fff;
+  text-align: center;
+  margin-top: 20px;
+}
+h2 {
+  font-size: 1.5rem;
+  color: #fff;
+  text-align: center;
+  margin-top: 10px;
+}
 /* 3. Main wrapper */
 .container {
   max-width: 720px;
@@ -87,7 +98,7 @@ input[type="button"],
 button:hover,
 input[type="button"]:hover,
 .link-button:hover {
-  background: #3367d6;
+  background: #92ade7;
 }
 
 /* 7. Lists */
@@ -239,4 +250,82 @@ form input[type="button"] {
 }
 .modal button:hover {
   background-color: #45a049;
+}
+.prescription-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px auto;
+  max-width: 600px;
+  text-align: left;
+  background-color: #f9f9f9;
+}
+.progress-bar {
+  height: 20px;
+  width: 0%;
+  text-align: center;
+  color: white;
+  line-height: 20px;
+  border-radius: 20px;
+  transition: width 0.5s;
+}
+.progress-container {
+  background-color: #eee;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.portal {
+  margin: 20px;
+}
+
+.portal a {
+  text-decoration: none;
+  padding: 12px 24px;
+  background-color: #4285f4;
+  color: white;
+  border-radius: 6px;
+  font-size: 1em;
+  display: inline-block;
+}
+
+.portal a:hover {
+  background-color: #3367d6;
+}
+textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  resize: vertical;
+}
+.feedback-btn {
+  margin-top: 5px;
+  padding: 8px 16px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.feedback-btn:hover {
+  background-color: #3367d6;
+}
+.status-message {
+  color: green;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+a button.back-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+a button.back-btn:hover {
+  background-color: #3367d6;
 }
