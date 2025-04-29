@@ -3,6 +3,10 @@
 A lightweight, responsive web application to help patients track their medication adherence and for providers to manage prescriptions, view patient feedback, and monitor dosing schedules. Built with plain HTML/CSS/JavaScript and Firebase for authentication & data storage.
 
 ---
+This is where you'll find the code for the Medication Adherence Web App. 
+
+Link to the [GitHub Repository](https://github.com/marthbear/MedicationAdherenceWebsite)
+
 
 ## Table of Contents
 
