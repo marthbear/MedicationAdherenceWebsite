@@ -2,20 +2,19 @@
 <html>
 <head>
   <title>Create Patient Account</title>
-  <link rel="stylesheet" href="med-style.css">
+  <link rel="stylesheet" href="createpatientaccount.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Create Patient Account</h2>
+  <h2>Create Patient Account</h2>
 
-    First Name: <input type="text" id="patient-firstname" placeholder="First Name"><br>
-    Last Name: <input type="text" id="patient-lastname" placeholder="Last Name"><br>
-    Email: <input type="email" id="patient-email" placeholder="Email"><br>
-    Password: <input type="password" id="patient-password"><br>
-    <input type="checkbox" onclick="togglePassword()">Show Password<br>
-    <button onclick="createPatientAccount()">Sign Up</button>
+  First Name: <input type="text" id="patient-firstname" placeholder="First Name"><br>
+  Last Name: <input type="text" id="patient-lastname" placeholder="Last Name"><br>
+  Email: <input type="email" id="patient-email" placeholder="Email"><br>
+  Password: <input type="password" id="patient-password"><br>
+  <input type="checkbox" onclick="togglePassword()">Show Password<br>
+  <button onclick="createPatientAccount()">Sign Up</button>
 
-    <p id="status"></p>
+  <p id="status"></p>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -65,6 +64,5 @@
       pw.type = pw.type === "password" ? "text" : "password";
     };
   </script>
-  </div>
 </body>
 </html>

@@ -2,43 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Provider Dashboard</title>
-  <link rel="stylesheet" href="med-style.css">
+  <link rel="stylesheet" href="ProviderDashboard.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    section {
+      margin: 20px 0;
+    }
+    input, textarea {
+      margin: 5px 0;
+      padding: 8px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #3367d6;
+    }
+    .prescription-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px auto;
+      max-width: 600px;
+      text-align: left;
+      background-color: #f9f9f9;
+    }
+  </style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>Provider Dashboard</h1>
+  <h1>Provider Dashboard</h1>
 
-    <!-- Manual Patient Linking -->
-    <section>
-      <h2>Link Patient by Email</h2>
-      <input type="email" id="manual-patient-email" placeholder="Patient Email">
-      <button onclick="linkPatientByEmail()">Link Patient</button>
-      <p id="manual-link-status"></p>
-    </section>
+  <!-- Manual Patient Linking -->
+  <section>
+    <h2>Link Patient by Email</h2>
+    <input type="email" id="manual-patient-email" placeholder="Patient Email">
+    <button onclick="linkPatientByEmail()">Link Patient</button>
+    <p id="manual-link-status"></p>
+  </section>
 
-    <!-- List of Linked Patients -->
-    <section>
-      <h2>Your Patients</h2>
-      <ul id="patient-list"></ul>
-      <p id="link-status"></p>
-    </section>
+  <!-- List of Linked Patients -->
+  <section>
+    <h2>Your Patients</h2>
+    <ul id="patient-list"></ul>
+    <p id="link-status"></p>
+  </section>
 
-    <!-- Prescription Section -->
-    <section id="prescription-section" class="hidden">
-      <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
-      <!-- inputs & button… -->
-      <button onclick="createPrescription()">Add Prescription</button>
-      <p id="rx-status"></p>
-    </section>
+  <!-- Prescription Section -->
+  <section id="prescription-section" style="display:none;">
+    <h2>Create New Prescription for <span id="selected-patient-name"></span></h2>
+    <input type="text" id="med-name" placeholder="Medicine Name"><br>
+    <input type="text" id="dosage" placeholder="Daily Dosage"><br>
+    <input type="text" id="dose-times" placeholder="Dose times (e.g. 08:00, 14:00)"><br>
+    <input type="date" id="start-date"><br>
+    <input type="date" id="end-date"><br>
+    <textarea id="med-description" placeholder="Description (e.g. what this is for)"></textarea><br>
+    <textarea id="doctor-notes" placeholder="Doctor's Notes (private notes)"></textarea><br>
+    <button onclick="createPrescription()">Add Prescription</button>
+    <p id="rx-status"></p>
+  </section>
 
-    <!-- Feedback Section -->
-    <section id="feedback-section" class="hidden">
-      <h2>Patient Feedback for <span id="feedback-patient-name"></span></h2>
-      <div id="feedback-list"></div>
-    </section>
+  <!-- Feedback Section -->
+  <section id="feedback-section" style="display:none;">
+    <h2>Patient Feedback for <span id="feedback-patient-name"></span></h2>
+    <div id="feedback-list"></div>
+  </section>
 
-    <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import {
@@ -230,6 +281,5 @@
       }
     });
   </script>
-  </div>
 </body>
 </html>
